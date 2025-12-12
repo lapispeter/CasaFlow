@@ -1,0 +1,53 @@
+<h2>Regisztráció</h2>
+
+<form (ngSubmit)="onRegister()">
+
+  <label>Felhasználónév</label>
+  <input
+    type="text"
+    name="name"
+    [(ngModel)]="name"
+  />
+
+  <label>Email</label>
+  <input
+    type="email"
+    name="email"
+    [(ngModel)]="email"
+  />
+
+  <label>Jelszó</label>
+  <input
+    type="password"
+    name="password"
+    [(ngModel)]="password"
+  />
+
+  <label>Jelszó megerősítés</label>
+  <input
+    type="password"
+    name="passwordConfirmation"
+    [(ngModel)]="passwordConfirmation"
+  />
+
+  <button type="submit" [disabled]="isSubmitting">
+    Regisztráció
+  </button>
+</form>
+
+<!-- Hibaüzenet -->
+<p *ngIf="errorMessage">
+  {{ errorMessage }}
+</p>
+
+<!-- Sikerüzenet -->
+<p *ngIf="successMessage">
+  {{ successMessage }}
+</p>
+
+<p>
+  Már van fiókod?
+  <a routerLink="/">Vissza a belépéshez</a>
+</p>
+
+

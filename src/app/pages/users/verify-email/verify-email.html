@@ -1,0 +1,14 @@
+<h2>Email megerősítés</h2>
+
+<p *ngIf="message && !error">
+  {{ message }}
+</p>
+
+<p *ngIf="error">
+  {{ error }}
+</p>
+
+<p>
+  <a routerLink="/">Vissza a belépéshez</a>
+</p>
+

@@ -1,0 +1,30 @@
+<h2>Belépés</h2>
+
+<form (ngSubmit)="onLogin()">
+  <label>Felhasználónév</label>
+  <input
+    type="text"
+    name="username"
+    [(ngModel)]="username"
+  />
+
+  <label>Jelszó</label>
+  <input
+    type="password"
+    name="password"
+    [(ngModel)]="password"
+  />
+
+  <button type="submit">Belépés</button>
+</form>
+
+<p>
+  Nincs még fiókod?
+  <a routerLink="/register">Regisztráció</a>
+</p>
+
+<p>
+  <a routerLink="/forgot-password">Elfelejtettem a jelszavam</a>
+</p>
+
+

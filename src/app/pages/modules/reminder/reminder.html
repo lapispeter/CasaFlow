@@ -1,0 +1,19 @@
+<p>reminder works!</p>
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Név</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @for(reminder of reminders; track reminder.id) {
+            <tr>
+                <td>{{reminder.id}}</td>
+                <td>{{reminder.name}}</td>
+                
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,19 @@
+<p>shopping-list works!</p>
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Név</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @for(shoppinglist of shoppinglists; track shoppinglist.id) {
+            <tr>
+                <td>{{shoppinglist.id}}</td>
+                <td>{{shoppinglist.name}}</td>
+                
+            </tr>
+        }
+    </tbody>
+</table>

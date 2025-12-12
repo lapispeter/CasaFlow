@@ -1,0 +1,21 @@
+<p>meter-reading works!</p>
+
+
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Mérőóra</th>
+            <th>Olvasás</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for(meterreading of meterreadings; track meterreading.id) {
+            <tr>
+                <td>{{meterreading.id}}</td>
+                <td>{{meterreading.meterType}}</td>
+                <td>{{meterreading.reading}}</td>
+            </tr>
+        }
+    </tbody>
+</table>

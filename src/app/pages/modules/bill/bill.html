@@ -1,0 +1,20 @@
+<p>bill works!</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Számlatípus</th>
+            <th>Mennyiség</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for(bill of bills; track bill.id) {
+            <tr>
+                <td>{{bill.id}}</td>
+                <td>{{bill.billType}}</td>
+                <td>{{bill.amount}}</td>
+            </tr>
+        }
+    </tbody>
+</table>

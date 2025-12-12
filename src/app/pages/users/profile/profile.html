@@ -1,0 +1,90 @@
+<h2>Saját adatok karbantartása</h2>
+
+<a routerLink="/home">Vissza a főoldalra</a>
+
+<hr />
+
+<!-- Profil adatok (név + email) -->
+
+<h3>Alapadatok</h3>
+
+<div *ngIf="isLoadingProfile">
+  Profil adatok betöltése…
+</div>
+
+<div *ngIf="!isLoadingProfile">
+
+  <form (ngSubmit)="onSaveProfile()">
+    <label>Felhasználónév</label>
+    <input
+      type="text"
+      name="name"
+      [(ngModel)]="name"
+    />
+
+    <label>Email cím</label>
+    <input
+      type="email"
+      name="email"
+      [(ngModel)]="email"
+    />
+
+    <button type="submit" [disabled]="isSavingProfile">
+      Adatok mentése
+    </button>
+  </form>
+
+  <p *ngIf="profileSuccess">
+    {{ profileSuccess }}
+  </p>
+
+  <p *ngIf="profileError">
+    {{ profileError }}
+  </p>
+</div>
+
+<hr />
+
+<!-- Jelszó módosítás -->
+
+<h3>Jelszó megváltoztatása</h3>
+
+<form (ngSubmit)="onChangePassword()">
+  <label>Régi jelszó</label>
+  <input
+    type="password"
+    name="oldPassword"
+    [(ngModel)]="oldPassword"
+  />
+
+  <label>Új jelszó</label>
+  <input
+    type="password"
+    name="newPassword"
+    [(ngModel)]="newPassword"
+  />
+
+  <label>Új jelszó megerősítése</label>
+  <input
+    type="password"
+    name="newPasswordConfirm"
+    [(ngModel)]="newPasswordConfirm"
+  />
+
+  <button type="submit" [disabled]="isChangingPassword">
+    Jelszó módosítása
+  </button>
+</form>
+
+<p *ngIf="passwordSuccess">
+  {{ passwordSuccess }}
+</p>
+
+<p *ngIf="passwordError">
+  {{ passwordError }}
+</p>
+
+<p>
+  <a routerLink="/">Vissza a belépéshez</a>
+</p>
+
