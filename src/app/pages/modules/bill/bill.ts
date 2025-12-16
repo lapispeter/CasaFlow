@@ -1,16 +1,20 @@
 import { Component } from '@angular/core';
 import { BillService } from '../../../services/bill-service';
+import { DatePipe } from '@angular/common';
 
 
 @Component({
   selector: 'app-bill',
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './bill.html',
   styleUrl: './bill.css',
 })
 export class Bill {
 
   bills: any;
+
+  showModal=false;
+  addmode=true;
 
   constructor(private api: BillService) { }
 
@@ -20,13 +24,27 @@ export class Bill {
 
   getBills() {
     this.api.getBills().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log(res)
-        this.bills = res
-      }
-    })
+        this.bills = res.data;
+      },
+      error: (err) => {
+        console.log(err);
+      },
+    });
   }
-  createBill () {} 
+  createBill () {
+    this.showModal=true;
+  } 
+
+  cancelBill () {
+    this.showModal=false;
+  }
+
+  saveBill () {
+    this.showModal=false;
+  }
+
   updateBill () {}
   deleteBill () {} 
 

@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 })
 export class BillService {
   
-  url='http://localhost:8000/bills'
+  url='http://localhost:8000/api/bills'
   constructor(private http: HttpClient) { }
 
   getBills(){

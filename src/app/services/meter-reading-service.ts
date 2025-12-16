@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 })
 export class MeterReadingService {
   
-  url='http://localhost:8000/meterReadings'
+  url='http://localhost:8000/api/meterReadings'
   constructor(private http: HttpClient) { }
 
   getMeterReadings(){

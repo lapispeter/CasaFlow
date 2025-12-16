@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 })
 export class ShoppingListService {
   
-  url='http://localhost:8000/shoppingLists'
+  url='http://localhost:8000/api/shoppingLists'
   constructor(private http: HttpClient) { }
 
   getShoppingLists(){

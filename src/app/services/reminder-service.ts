@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 })
 export class ReminderServicevice {
   
-  url='http://localhost:8000/reminders'
+  url='http://localhost:8000/api/reminders'
   constructor(private http: HttpClient) { }
 
   getReminders(){

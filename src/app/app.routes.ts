@@ -7,30 +7,23 @@ import { ForgotPassword } from './pages/users/forgot-password/forgot-password';
 import { ResetPassword } from './pages/users/reset-password/reset-password';
 import { VerifyEmail } from './pages/users/verify-email/verify-email';
 import { Profile } from './pages/users/profile/profile';
+import { Bill } from './pages/modules/bill/bill';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: Login
-  },
-  {
-    path: 'home',
-    component: Home
-  },
-  {
-    path: 'register',
-    component: Register
-  },
+  { path: '', component: Login },
 
-  {
-    path: 'forgot-password',
-    component: ForgotPassword
-  },
+  { path: 'home', component: Home },
+
+  { path: 'register', component: Register },
+
+  { path: 'forgot-password', component: ForgotPassword },
 
   { path: 'reset-password', component: ResetPassword },
 
   { path: 'verify-email', component: VerifyEmail } ,
   
-  { path: 'profile', component: Profile }
+  { path: 'profile', component: Profile },
+
+  {path: 'bill', component: Bill}
 
 ];
