@@ -1,7 +1,7 @@
 <br>
 <h1>SZÁMLÁK</h1> <br> <br>
 
-<button (click)="createBill()"
+<button (click)="startShowModal()"
 class="btn btn-primary">Új számla</button>
 <br><br>
 <table class="table table-striped">
@@ -32,15 +32,52 @@ class="btn btn-primary">Új számla</button>
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Modal title</h5>
-          <button type="button" class="btn-close" aria-label="Close" (click)="cancelBill()"></button>
+          <h5 class="modal-title">{{addMode ? 'Hozzáadás' : 'Módosítás'}}</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
         </div>
         <div class="modal-body">
-          <p>Modal body text goes here.</p>
+          
+          <form [formGroup]="billForm" (ngSubmit)="startSave()" id="billForm">
+            <div class="form-group">
+
+              <label for="billType" class="form-label">Számlatípus</label>
+              <input
+                type="text"
+                class="form-control" formControlName="billType"/>
+            </div>
+
+            <div class="form-group">
+              <label for="amount" class="form-label">Fizetendő összeg</label>
+              <input
+                type="text"
+                class="form-control" formControlName="amount"/>
+            </div>
+
+            <div class="form-group">
+              <label for="date" class="form-label">Határidő</label>
+              <input
+                type="date"
+                class="form-control" formControlName="date"/>
+            </div> 
+
+            <div class="form-group">
+              <label for="paymentStatus" class="form-label">Fizetve</label>
+              <input
+                type="text"
+                class="form-control" formControlName="paymentStatus"/>
+            </div>
+
+
+
+          </form>
+
+
+
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cancelBill()">Bezárás</button>
-          <button type="button" class="btn btn-primary" (click)="saveBill()">Mentés</button>
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Bezárás</button>
+
+          <button type="submit" class="btn btn-primary" form="billForm">Mentés</button>
         </div>
       </div>
     </div>
