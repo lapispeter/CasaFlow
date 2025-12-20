@@ -5,20 +5,26 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class BillService {
-  
-  url='http://localhost:8000/api/bills'
-  constructor(private http: HttpClient) { }
 
-  getBills(){
-    return this.http.get(this.url)
+  url = 'http://localhost:8000/api/bills';
+
+  constructor(private http: HttpClient) {}
+
+  getBills() {
+    return this.http.get(this.url);
   }
-  createBill(bill: any){
-    return this.http.post(this.url, bill)
+
+  createBill(bill: any) {
+    return this.http.post(this.url, bill);
   }
-  updateBill(bill: any){
-    return this.http.put(this.url +'/'+ bill.id, bill)
+
+  // ✅ UPDATE: id + body
+  updateBill(id: number, bill: any) {
+    return this.http.put(this.url + '/' + id, bill);
   }
-  deleteBill(id: number){
-    return this.http.delete(this.url +'/'+ id)
+
+  deleteBill(id: number) {
+    return this.http.delete(this.url + '/' + id);
   }
 }
+
