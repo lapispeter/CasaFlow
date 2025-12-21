@@ -45,11 +45,12 @@ export class Bill {
     });
 
     this.filterForm = this.builder.group({
-      billTypeMode: ['all'],  // all | custom
-      billTypeText: [''],     // víz/gáz/...
-      periodMonths: [1],      // 1/3/6
-      paymentMode: ['all']    // all | Igen | Nem
+      billTypeMode: ['all'],     // all | custom
+      billTypeText: [''],
+      periodMonths: ['1'],       // ✅ string: '1' | '3' | '6' | '12' | 'all'
+      paymentMode: ['all']
     });
+
   }
 
   // ------- FILTER MODAL -------
@@ -71,11 +72,11 @@ export class Bill {
         : '';
 
     this.api.getBillsFiltered({
-      billTypeMode: f.billTypeMode,       // all/custom
-      billTypeText: billTypeText,         // ha custom
-      periodMonths: f.periodMonths,
+      billTypeMode: f.billTypeMode,
+      billTypeText,
+      periodMonths: String(f.periodMonths),
       paymentMode: f.paymentMode
-    }).subscribe({
+      }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
         this.bills = Array.isArray(list) ? list : [];

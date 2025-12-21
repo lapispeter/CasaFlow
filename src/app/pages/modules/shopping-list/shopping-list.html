@@ -1,19 +1,194 @@
-<p>shopping-list works!</p>
-<table>
+<br>
+<h1>BEVÁSÁRLÓ LISTA</h1>
+<br><br>
+
+<button (click)="startShowModal()" class="btn btn-primary me-2">Új tétel</button>
+<button (click)="openFilterModal()" class="btn btn-secondary">Bevásárló listám</button>
+
+<br><br>
+
+@if(noResultsMessage){
+  <div class="alert alert-warning">
+    {{ noResultsMessage }}
+  </div>
+}
+
+@if(showList){
+  <table class="table table-striped">
     <thead>
-        <tr>
-            <th>Id</th>
-            <th>Név</th>
-            
-        </tr>
+      <tr>
+        <th>Cím</th>
+        <th>Megjegyzés</th>
+        <th>Mennyiség</th>
+        <th>Vétel dátuma</th>
+        <th>Lejárat</th>
+        <th>Megvéve</th>
+        <th>Műveletek</th>
+      </tr>
     </thead>
+
     <tbody>
-        @for(shoppinglist of shoppinglists; track shoppinglist.id) {
-            <tr>
-                <td>{{shoppinglist.id}}</td>
-                <td>{{shoppinglist.name}}</td>
-                
-            </tr>
-        }
+      @for(i of items; track i.id) {
+        <tr>
+          <td>{{ i.title }}</td>
+          <td>{{ i.note }}</td>
+          <td>{{ i.quantity }} {{ i.unit }}</td>
+          <td>{{ i.purchaseDate | date:'yyyy. MM. dd.' }}</td>
+          <td>{{ i.expiryDate | date:'yyyy. MM. dd.' }}</td>
+          <td>{{ i.isBought ? 'Igen' : 'Nem' }}</td>
+
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="startEdit(i)">Módosítás</button>
+            <button class="btn btn-sm btn-danger" (click)="startDelete(i)">Törlés</button>
+          </td>
+        </tr>
+      }
     </tbody>
-</table>
+  </table>
+}
+
+<!-- ✅ SZŰRŐ MODAL -->
+@if(showFilterModal){
+  <div class="modal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Bevásárló lista – szűrés</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeFilterModal()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" id="filterForm">
+
+            <div class="form-group">
+              <label class="form-label">Cím</label>
+              <select class="form-select" formControlName="titleMode">
+                <option value="all">Összes</option>
+                <option value="custom">Kézzel megadom</option>
+              </select>
+            </div>
+
+            @if(filterForm.value.titleMode === 'custom'){
+              <div class="form-group mt-2">
+                <label class="form-label">Írd be (pl. tej, kenyér...)</label>
+                <input type="text" class="form-control" formControlName="titleText" />
+              </div>
+            }
+
+            <div class="form-group mt-2">
+              <label class="form-label">Időtartam (vétel dátuma szerint)</label>
+              <select class="form-select" formControlName="periodMonths">
+                <option value="1">1 hónap</option>
+                <option value="3">3 hónap</option>
+                <option value="6">6 hónap</option>
+                <option value="12">1 év</option>
+                <option value="all">Összes</option>
+              </select>
+            </div>
+
+            <div class="form-group mt-2">
+              <label class="form-label">Állapot</label>
+              <select class="form-select" formControlName="boughtMode">
+                <option value="all">Összes</option>
+                <option value="false">Nincs megvéve</option>
+                <option value="true">Megvéve</option>
+              </select>
+            </div>
+
+            <div class="form-group mt-2">
+              <label class="form-label">Lejárat (opcionális)</label>
+              <select class="form-select" formControlName="expiryMode">
+                <option value="all">Összes</option>
+                <option value="onlyWithExpiry">Csak aminek van lejárata</option>
+                <option value="expired">Lejárt</option>
+                <option value="expiringSoon">Hamarosan lejár (7 nap)</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeFilterModal()">Mégse</button>
+          <button type="submit" class="btn btn-success" form="filterForm">Lekérdezés</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show"></div>
+}
+
+<!-- ✅ CRUD MODAL -->
+@if(showModal){
+  <div class="modal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">{{ addMode ? 'Hozzáadás' : 'Módosítás' }}</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="itemForm" (ngSubmit)="startSave()" id="itemForm">
+
+            <div class="form-group">
+              <label class="form-label">Cím</label>
+              <input type="text" class="form-control" formControlName="title" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Megjegyzés</label>
+              <input type="text" class="form-control" formControlName="note" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mennyiség</label>
+              <input type="number" class="form-control" formControlName="quantity" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mértékegység</label>
+              <input type="text" class="form-control" formControlName="unit" placeholder="db / kg / l" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Vétel dátuma</label>
+              <input type="date" class="form-control" formControlName="purchaseDate" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Lejárati idő</label>
+              <input type="date" class="form-control" formControlName="expiryDate" />
+            </div>
+
+            <div class="form-group mt-2">
+              <label class="form-label">Megvéve</label>
+              <select class="form-select" formControlName="isBought">
+                <option [ngValue]="false">Nem</option>
+                <option [ngValue]="true">Igen</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Bezárás</button>
+          <button type="submit" class="btn btn-primary" form="itemForm">Mentés</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show"></div>
+}
+
+<br><br><br>
+<p>
+  <a routerLink="/home">vissza a főoldalra</a>
+</p>

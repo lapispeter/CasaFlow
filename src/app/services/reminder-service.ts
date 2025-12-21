@@ -1,24 +1,32 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ReminderServicevice {
-  
-  url='http://localhost:8000/api/reminders'
-  constructor(private http: HttpClient) { }
+export class ReminderService {
+  url = 'http://localhost:8000/api/reminders';
 
-  getReminders(){
-    return this.http.get(this.url)
+  constructor(private http: HttpClient) {}
+
+  getFiltered(filters: { titleMode: string; titleText: string; periodMonths: string }) {
+    let params = new HttpParams()
+      .set('titleMode', filters.titleMode)
+      .set('titleText', filters.titleText)
+      .set('periodMonths', filters.periodMonths);
+
+    return this.http.get(this.url, { params });
   }
-  createReminder(reminder: any){
-    return this.http.post(this.url, reminder)
+
+  create(payload: any) {
+    return this.http.post(this.url, payload);
   }
-  updateReminder(reminder: any){
-    return this.http.put(this.url +'/'+ reminder.id, reminder)
+
+  update(id: number, payload: any) {
+    return this.http.put(this.url + '/' + id, payload);
   }
-  deleteReminder(id: number){
-    return this.http.delete(this.url +'/'+ id)
+
+  delete(id: number) {
+    return this.http.delete(this.url + '/' + id);
   }
 }

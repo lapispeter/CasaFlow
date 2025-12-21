@@ -9,14 +9,15 @@ export class MeterReadingService {
 
   constructor(private http: HttpClient) {}
 
-  getFiltered(filters: { meterTypeMode: string; meterTypeText: string; periodMonths: number }) {
+  getFiltered(filters: { meterTypeMode: string; meterTypeText: string; periodMonths: string }) {
     let params = new HttpParams()
       .set('meterTypeMode', filters.meterTypeMode)
       .set('meterTypeText', filters.meterTypeText)
-      .set('periodMonths', String(filters.periodMonths));
+      .set('periodMonths', filters.periodMonths); // ✅ 'all' is lehet
 
     return this.http.get(this.url, { params });
   }
+
 
   create(payload: any) {
     return this.http.post(this.url, payload);

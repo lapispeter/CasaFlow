@@ -76,9 +76,11 @@
             <div class="form-group mt-2">
               <label class="form-label">Időtartam</label>
               <select class="form-select" formControlName="periodMonths">
-                <option [ngValue]="1">1 hónap</option>
-                <option [ngValue]="3">3 hónap</option>
-                <option [ngValue]="6">6 hónap</option>
+                  <option value="1">1 hónap</option>
+                  <option value="3">3 hónap</option>
+                  <option value="6">6 hónap</option>
+                  <option value="12">1 év</option>
+                  <option value="all">Összes</option>
               </select>
             </div>
 

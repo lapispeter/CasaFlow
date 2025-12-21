@@ -9,15 +9,16 @@ export class BillService {
 
   constructor(private http: HttpClient) {}
 
-  getBillsFiltered(filters: { billTypeMode: string; billTypeText: string; periodMonths: number; paymentMode: string }) {
+  getBillsFiltered(filters: { billTypeMode: string; billTypeText: string; periodMonths: string; paymentMode: string }) {
     let params = new HttpParams()
-      .set('billTypeMode', filters.billTypeMode)     // all | custom
-      .set('billTypeText', filters.billTypeText)     // csak ha custom
-      .set('periodMonths', String(filters.periodMonths))
-      .set('paymentMode', filters.paymentMode);      // all | Igen | Nem
+      .set('billTypeMode', filters.billTypeMode)
+      .set('billTypeText', filters.billTypeText)
+      .set('periodMonths', filters.periodMonths)   // ✅ '1'|'3'|'6'|'12'|'all'
+      .set('paymentMode', filters.paymentMode);
 
     return this.http.get(this.url, { params });
   }
+
 
   createBill(bill: any) {
     return this.http.post(this.url, bill);

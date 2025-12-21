@@ -9,6 +9,8 @@ import { VerifyEmail } from './pages/users/verify-email/verify-email';
 import { Profile } from './pages/users/profile/profile';
 import { Bill } from './pages/modules/bill/bill';
 import { MeterReading } from './pages/modules/meter-reading/meter-reading';
+import { Reminder } from './pages/modules/reminder/reminder';
+import { ShoppingList } from './pages/modules/shopping-list/shopping-list';
 
 export const routes: Routes = [
   { path: '', component: Login },
@@ -29,5 +31,9 @@ export const routes: Routes = [
 
   { path: 'login', component: Login },
 
-  { path: 'meter-reading', component: MeterReading}
+  { path: 'meter-reading', component: MeterReading},
+
+  { path: 'reminder', component: Reminder },
+
+  { path: 'shopping-list', component: ShoppingList },
 ];

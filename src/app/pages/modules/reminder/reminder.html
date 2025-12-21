@@ -1,19 +1,145 @@
-<p>reminder works!</p>
-<table>
+<br>
+<h1>EMLÉKEZTETŐK</h1>
+<br><br>
+
+<button (click)="startShowModal()" class="btn btn-primary me-2">Új emlékeztető</button>
+<button (click)="openFilterModal()" class="btn btn-secondary">Emlékeztetőim</button>
+
+<br><br>
+
+@if(noResultsMessage){
+  <div class="alert alert-warning">
+    {{ noResultsMessage }}
+  </div>
+}
+
+@if(showList){
+  <table class="table table-striped">
     <thead>
-        <tr>
-            <th>Id</th>
-            <th>Név</th>
-            
-        </tr>
+      <tr>
+        <th>Cím</th>
+        <th>Leírás</th>
+        <th>Dátum</th>
+        <th>Műveletek</th>
+      </tr>
     </thead>
+
     <tbody>
-        @for(reminder of reminders; track reminder.id) {
-            <tr>
-                <td>{{reminder.id}}</td>
-                <td>{{reminder.name}}</td>
-                
-            </tr>
-        }
+      @for(r of reminders; track r.id) {
+        <tr>
+          <td>{{ r.title }}</td>
+          <td>{{ r.description }}</td>
+          <td>{{ r.date | date:'yyyy. MM. dd.' }}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="startEdit(r)">Módosítás</button>
+            <button class="btn btn-sm btn-danger" (click)="startDelete(r)">Törlés</button>
+          </td>
+        </tr>
+      }
     </tbody>
-</table>
+  </table>
+}
+
+<!-- ✅ SZŰRŐ MODAL -->
+@if(showFilterModal){
+  <div class="modal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Emlékeztetőim – szűrés</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeFilterModal()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" id="filterForm">
+
+            <div class="form-group">
+              <label class="form-label">Cím</label>
+              <select class="form-select" formControlName="titleMode">
+                <option value="all">Összes</option>
+                <option value="custom">Kézzel megadom</option>
+              </select>
+            </div>
+
+            @if(filterForm.value.titleMode === 'custom'){
+              <div class="form-group mt-2">
+                <label class="form-label">Írd be a címet</label>
+                <input type="text" class="form-control" formControlName="titleText" />
+              </div>
+            }
+
+            <div class="form-group mt-2">
+              <label class="form-label">Időtartam</label>
+              <select class="form-select" formControlName="periodMonths">
+                <option value="1">1 hónap</option>
+                <option value="3">3 hónap</option>
+                <option value="6">6 hónap</option>
+                <option value="12">1 év</option>
+                <option value="all">Összes</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeFilterModal()">Mégse</button>
+          <button type="submit" class="btn btn-success" form="filterForm">Lekérdezés</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show"></div>
+}
+
+<!-- ✅ CRUD MODAL -->
+@if(showModal){
+  <div class="modal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">{{ addMode ? 'Hozzáadás' : 'Módosítás' }}</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="reminderForm" (ngSubmit)="startSave()" id="reminderForm">
+
+            <div class="form-group">
+              <label class="form-label">Cím</label>
+              <input type="text" class="form-control" formControlName="title" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Leírás</label>
+              <input type="text" class="form-control" formControlName="description" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Dátum</label>
+              <input type="date" class="form-control" formControlName="date" />
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Bezárás</button>
+          <button type="submit" class="btn btn-primary" form="reminderForm">Mentés</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show"></div>
+}
+
+<br><br><br>
+<p>
+  <a routerLink="/home">vissza a főoldalra</a>
+</p>

@@ -41,9 +41,9 @@ export class MeterReading {
 
     // Filter
     this.filterForm = this.builder.group({
-      meterTypeMode: ['all'],   // all | custom
-      meterTypeText: [''],      // víz/gáz...
-      periodMonths: [1]         // 1/3/6
+      meterTypeMode: ['all'],
+      meterTypeText: [''],
+      periodMonths: ['1']      // ✅ '1'|'3'|'6'|'12'|'all'
     });
   }
 
@@ -68,7 +68,7 @@ export class MeterReading {
     this.api.getFiltered({
       meterTypeMode: f.meterTypeMode,
       meterTypeText,
-      periodMonths: f.periodMonths
+      periodMonths: String(f.periodMonths)
     }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
