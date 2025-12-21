@@ -1,24 +1,143 @@
-<p>meter-reading works!</p>
+<br>
+<h1>MÉRŐÓRA LEOLVASÁSOK</h1>
+<br><br>
 
+<button (click)="startShowModal()" class="btn btn-primary me-2">Új leolvasás</button>
+<button (click)="openFilterModal()" class="btn btn-secondary">Leolvasásaim</button>
 
-<table>
+<br><br>
+
+@if(noResultsMessage){
+  <div class="alert alert-warning">
+    {{ noResultsMessage }}
+  </div>
+}
+
+@if(showList){
+  <table class="table table-striped">
     <thead>
-        <tr>
-            <th>Id</th>
-            <th>Mérőóra</th>
-            <th>Olvasás</th>
-        </tr>
+      <tr>
+        <th>Típus</th>
+        <th>Leolvasás</th>
+        <th>Dátum</th>
+        <th>Műveletek</th>
+      </tr>
     </thead>
+
     <tbody>
-        @for(meterreading of meterreadings; track meterreading.id) {
-            <tr>
-                <td>{{meterreading.id}}</td>
-                <td>{{meterreading.meterType}}</td>
-                <td>{{meterreading.reading}}</td>
-            </tr>
-        }
+      @for(r of readings; track r.id) {
+        <tr>
+          <td>{{ r.meterType }}</td>
+          <td>{{ r.reading }}</td>
+          <td>{{ r.date | date:'yyyy. MM. dd.' }}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="startEdit(r)">Módosítás</button>
+            <button class="btn btn-sm btn-danger" (click)="startDelete(r)">Törlés</button>
+          </td>
+        </tr>
+      }
     </tbody>
-</table>
+  </table>
+}
+
+<!-- ✅ SZŰRŐ MODAL -->
+@if(showFilterModal){
+  <div class="modal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Leolvasásaim – szűrés</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeFilterModal()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" id="filterForm">
+
+            <div class="form-group">
+              <label class="form-label">Mérő típusa</label>
+              <select class="form-select" formControlName="meterTypeMode">
+                <option value="all">Összes</option>
+                <option value="custom">Kézzel megadom</option>
+              </select>
+            </div>
+
+            @if(filterForm.value.meterTypeMode === 'custom'){
+              <div class="form-group mt-2">
+                <label class="form-label">Írd be (pl. víz, gáz...)</label>
+                <input type="text" class="form-control" formControlName="meterTypeText" />
+              </div>
+            }
+
+            <div class="form-group mt-2">
+              <label class="form-label">Időtartam</label>
+              <select class="form-select" formControlName="periodMonths">
+                <option [ngValue]="1">1 hónap</option>
+                <option [ngValue]="3">3 hónap</option>
+                <option [ngValue]="6">6 hónap</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeFilterModal()">Mégse</button>
+          <button type="submit" class="btn btn-success" form="filterForm">Lekérdezés</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show"></div>
+}
+
+<!-- ✅ CRUD MODAL -->
+@if(showModal){
+  <div class="modal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">{{ addMode ? 'Hozzáadás' : 'Módosítás' }}</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="mrForm" (ngSubmit)="startSave()" id="mrForm">
+
+            <div class="form-group">
+              <label class="form-label">Mérő típusa</label>
+              <input type="text" class="form-control" formControlName="meterType" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Leolvasás</label>
+              <input type="number" class="form-control" formControlName="reading" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Dátum</label>
+              <input type="date" class="form-control" formControlName="date" />
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Bezárás</button>
+          <button type="submit" class="btn btn-primary" form="mrForm">Mentés</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show"></div>
+}
+
+<br><br><br>
 
 <p>
   <a routerLink="/home">vissza a főoldalra</a>
