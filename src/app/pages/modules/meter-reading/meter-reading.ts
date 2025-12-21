@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { MeterReadingService } from '../../../services/meter-reading-service';
+import { RouterModule } from '@angular/router';
 
 
 @Component({
   selector: 'app-meter-reading',
-  imports: [],
+  imports: [RouterModule],
+  standalone: true,
   templateUrl: './meter-reading.html',
   styleUrl: './meter-reading.css',
 })

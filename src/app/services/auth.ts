@@ -141,5 +141,20 @@ export class AuthService {
     }
   }
 
+ getCurrentUserName(): string {
+  const auth = localStorage.getItem('auth');
+  if (!auth) return '';
+  try {
+    const data = JSON.parse(auth) as LoginResponse;
+    return data.name ?? '';
+  } catch {
+    return '';
+  }
+}
+
+logout() {
+  localStorage.removeItem('auth');
+}
+
 
 }

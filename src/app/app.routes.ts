@@ -8,6 +8,7 @@ import { ResetPassword } from './pages/users/reset-password/reset-password';
 import { VerifyEmail } from './pages/users/verify-email/verify-email';
 import { Profile } from './pages/users/profile/profile';
 import { Bill } from './pages/modules/bill/bill';
+import { MeterReading } from './pages/modules/meter-reading/meter-reading';
 
 export const routes: Routes = [
   { path: '', component: Login },
@@ -24,6 +25,9 @@ export const routes: Routes = [
   
   { path: 'profile', component: Profile },
 
-  {path: 'bill', component: Bill}
+  { path: 'bill', component: Bill},
 
+  { path: 'login', component: Login },
+
+  { path: 'meter-reading', component: MeterReading}
 ];

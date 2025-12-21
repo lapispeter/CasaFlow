@@ -2,66 +2,119 @@ import { Component } from '@angular/core';
 import { BillService } from '../../../services/bill-service';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
 
 @Component({
   selector: 'app-bill',
-  imports: [DatePipe, ReactiveFormsModule],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink],
   templateUrl: './bill.html',
   styleUrl: './bill.css',
 })
 export class Bill {
+  bills: any[] = [];
 
-  bills!: any[];
   billForm: any;
+  filterForm: any;
 
   showModal = false;
   addMode = true;
-
-  // ✅ ezt eltároljuk módosításhoz/törléshez
   selectedBill: any = null;
 
-  constructor(
-    private api: BillService,
-    private builder: FormBuilder
-  ) {}
+  showList = false;
+
+  // ✅ új: filter modal
+  showFilterModal = false;
+
+  // ✅ új: egyszerű üzenet, ha nincs találat
+  noResultsMessage = '';
+
+  constructor(private api: BillService, private builder: FormBuilder) {}
 
   ngOnInit() {
-    this.getBills();
-    this.initForm();
+    this.initForms();
+    // nem töltünk listát automatikusan
   }
 
-  initForm() {
+  initForms() {
     this.billForm = this.builder.group({
       billType: [''],
       amount: [''],
       date: [''],
-      paymentStatus: ['Nem']   // ✅ alapérték (opcionális)
+      paymentStatus: ['Nem']
+    });
+
+    this.filterForm = this.builder.group({
+      billTypeMode: ['all'],  // all | custom
+      billTypeText: [''],     // víz/gáz/...
+      periodMonths: [1],      // 1/3/6
+      paymentMode: ['all']    // all | Igen | Nem
     });
   }
 
-  getBills() {
-    this.api.getBills().subscribe({
+  // ------- FILTER MODAL -------
+  openFilterModal() {
+    this.noResultsMessage = '';
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal() {
+    this.showFilterModal = false;
+  }
+
+  applyFilters() {
+    const f = this.filterForm.value;
+
+    const billTypeText =
+      f.billTypeMode === 'custom'
+        ? String(f.billTypeText ?? '').trim()
+        : '';
+
+    this.api.getBillsFiltered({
+      billTypeMode: f.billTypeMode,       // all/custom
+      billTypeText: billTypeText,         // ha custom
+      periodMonths: f.periodMonths,
+      paymentMode: f.paymentMode
+    }).subscribe({
       next: (res: any) => {
-        this.bills = res.data;
+        const list = res.data ?? res;
+        this.bills = Array.isArray(list) ? list : [];
+
+        this.showList = true;
+        this.closeFilterModal(); // ✅ művelet után tűnjön el
+
+        if (this.bills.length === 0) {
+          // legegyszerűbb jelzés
+          this.noResultsMessage = billTypeText
+            ? `Nincs ilyen nevű számlád: "${billTypeText}".`
+            : 'Nincs találat a megadott szűrésre.';
+        } else {
+          this.noResultsMessage = '';
+        }
       },
-      error: (err) => console.log(err),
+      error: (err) => {
+        console.log(err);
+        this.closeFilterModal();
+        this.noResultsMessage = 'Hiba történt a lekérdezésnél.';
+      }
     });
   }
 
-  // ✅ Új számla
+  // ------- CRUD MODAL -------
   startShowModal() {
     this.addMode = true;
     this.selectedBill = null;
+
     this.billForm.reset({
       billType: '',
       amount: '',
       date: '',
       paymentStatus: 'Nem'
     });
+
     this.showModal = true;
   }
 
-  // ✅ Módosítás indítása (modal feltöltése)
   startEdit(bill: any) {
     this.addMode = false;
     this.selectedBill = bill;
@@ -69,7 +122,6 @@ export class Bill {
     this.billForm.patchValue({
       billType: bill.billType,
       amount: bill.amount,
-      // ha backend ISO stringet ad, a date input yyyy-MM-dd-t vár:
       date: this.toDateInputValue(bill.date),
       paymentStatus: bill.paymentStatus
     });
@@ -84,11 +136,8 @@ export class Bill {
   startSave() {
     this.showModal = false;
 
-    if (this.addMode) {
-      this.startAddBill();
-    } else {
-      this.startUpdateBill();
-    }
+    if (this.addMode) this.startAddBill();
+    else this.startUpdateBill();
   }
 
   startAddBill() {
@@ -100,12 +149,14 @@ export class Bill {
     };
 
     this.api.createBill(newBill).subscribe({
-      next: () => this.getBills(),
+      next: () => {
+        // ha már van lista, frissítsük ugyanazzal a szűréssel
+        if (this.showList) this.applyFilters();
+      },
       error: (err) => console.log(err),
     });
   }
 
-  // ✅ UPDATE
   startUpdateBill() {
     if (!this.selectedBill?.id) return;
 
@@ -116,27 +167,26 @@ export class Bill {
       paymentStatus: this.billForm.value.paymentStatus
     };
 
-   this.api.updateBill(this.selectedBill.id, updatedBill).subscribe({
-   next: () => this.getBills(),
-   error: (err) => console.log(err),
-   });
-
-  }
-
-  // ✅ DELETE
-  startDelete(bill: any) {
-    // egyszerű confirm
-    const ok = confirm(`Biztos törlöd ezt a számlát? (${bill.billType})`);
-    if (!ok) return;
-
-    // Feltételezem, hogy van ilyen a service-ben: deleteBill(id)
-    this.api.deleteBill(bill.id).subscribe({
-      next: () => this.getBills(),
+    this.api.updateBill(this.selectedBill.id, updatedBill).subscribe({
+      next: () => {
+        if (this.showList) this.applyFilters();
+      },
       error: (err) => console.log(err),
     });
   }
 
-  // ✅ segéd: ISO date -> yyyy-MM-dd
+  startDelete(bill: any) {
+    const ok = confirm(`Biztos törlöd ezt a számlát? (${bill.billType})`);
+    if (!ok) return;
+
+    this.api.deleteBill(bill.id).subscribe({
+      next: () => {
+        if (this.showList) this.applyFilters();
+      },
+      error: (err) => console.log(err),
+    });
+  }
+
   private toDateInputValue(dateValue: any): string {
     if (!dateValue) return '';
     const d = new Date(dateValue);
@@ -147,5 +197,3 @@ export class Bill {
     return `${yyyy}-${mm}-${dd}`;
   }
 }
-
-
