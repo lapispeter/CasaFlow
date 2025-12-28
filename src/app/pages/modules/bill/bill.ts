@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import { BillService } from '../../../services/bill-service';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-bill',
@@ -22,18 +21,32 @@ export class Bill {
   selectedBill: any = null;
 
   showList = false;
-
-  // ✅ új: filter modal
   showFilterModal = false;
 
-  // ✅ új: egyszerű üzenet, ha nincs találat
   noResultsMessage = '';
 
-  constructor(private api: BillService, private builder: FormBuilder) {}
+  constructor(
+    private api: BillService,
+    private builder: FormBuilder,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.initForms();
-    // nem töltünk listát automatikusan
+
+    // ✅ Ha Home-ról jövünk, automatikusan futtatjuk a "fizetendő számlák" szűrést
+    this.route.queryParams.subscribe((params: any) => {
+      if (params?.fromHome) {
+        this.filterForm.patchValue({
+          billTypeMode: 'all',
+          billTypeText: '',
+          periodMonths: 'all',
+          paymentMode: 'Nem'
+        });
+
+        this.applyFilters();
+      }
+    });
   }
 
   initForms() {
@@ -47,10 +60,9 @@ export class Bill {
     this.filterForm = this.builder.group({
       billTypeMode: ['all'],     // all | custom
       billTypeText: [''],
-      periodMonths: ['1'],       // ✅ string: '1' | '3' | '6' | '12' | 'all'
+      periodMonths: ['1'],       // '1' | '3' | '6' | '12' | 'all'
       paymentMode: ['all']
     });
-
   }
 
   // ------- FILTER MODAL -------
@@ -76,16 +88,15 @@ export class Bill {
       billTypeText,
       periodMonths: String(f.periodMonths),
       paymentMode: f.paymentMode
-      }).subscribe({
+    }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
         this.bills = Array.isArray(list) ? list : [];
 
         this.showList = true;
-        this.closeFilterModal(); // ✅ művelet után tűnjön el
+        this.closeFilterModal();
 
         if (this.bills.length === 0) {
-          // legegyszerűbb jelzés
           this.noResultsMessage = billTypeText
             ? `Nincs ilyen nevű számlád: "${billTypeText}".`
             : 'Nincs találat a megadott szűrésre.';
@@ -151,7 +162,6 @@ export class Bill {
 
     this.api.createBill(newBill).subscribe({
       next: () => {
-        // ha már van lista, frissítsük ugyanazzal a szűréssel
         if (this.showList) this.applyFilters();
       },
       error: (err) => console.log(err),

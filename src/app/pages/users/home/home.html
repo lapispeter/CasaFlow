@@ -1,11 +1,33 @@
 <h2>Home</h2>
+
 <p>Sikeres belépés, üdv itthon {{ name }} 💖</p>
+
+<!-- ✅ Mini dashboard gombok -->
+<div style="display:flex; gap:12px; flex-wrap:wrap; margin:16px 0;">
+
+  <button class="btn btn-primary" (click)="goUnpaidBills()">
+    Számlák: ({{ unpaidBillsCount }}) fizetendő
+  </button>
+
+  <button class="btn btn-warning" (click)="goTodayReminders()">
+    Emlékeztetők: ({{ todayRemindersCount }}) ma
+  </button>
+
+  <button class="btn btn-success" (click)="goShoppingOpen()">
+    Bevásárló lista: ({{ shoppingOpenCount }}) tétel
+  </button>
+
+</div>
+
+<!-- ✅ Maradhatnak a sima linkek is (ha szeretnéd) -->
 <p>
   <a routerLink="/profile">Saját adatok karbantartása</a>
 </p>
+
 <p>
   <a routerLink="/bill">Számláim</a>
 </p>
+
 <p>
   <a routerLink="/meter-reading">Leolvasások</a>
 </p>
