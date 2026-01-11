@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ReminderService } from '../../../services/reminder-service';
 
 @Component({
@@ -25,10 +25,21 @@ export class Reminder {
 
   noResultsMessage = '';
 
-  constructor(private api: ReminderService, private builder: FormBuilder) {}
+  constructor(
+    private api: ReminderService,
+    private builder: FormBuilder,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.initForms();
+
+    // ✅ Ha Home-ról jövünk, automatikusan listázza a "mai" emlékeztetőket
+    this.route.queryParams.subscribe((params: any) => {
+      if (params?.fromHome) {
+        this.loadTodayReminders();
+      }
+    });
   }
 
   initForms() {
@@ -44,6 +55,46 @@ export class Reminder {
       titleMode: ['all'],      // all | custom
       titleText: [''],
       periodMonths: ['1']      // '1'|'3'|'6'|'12'|'all'
+    });
+  }
+
+  // ✅ Home-ról: "ma" szűrés (frontend)
+  loadTodayReminders() {
+    this.noResultsMessage = '';
+
+    // Lekérjük az összeset, és kiszűrjük mára
+    this.api.getFiltered({
+      titleMode: 'all',
+      titleText: '',
+      periodMonths: 'all'
+    }).subscribe({
+      next: (res: any) => {
+        const list = res.data ?? res;
+        const all = Array.isArray(list) ? list : [];
+
+        const today = new Date();
+
+        this.reminders = all.filter((r: any) => {
+          if (!r?.date) return false;
+          const d = new Date(r.date);
+          return d.getFullYear() === today.getFullYear()
+            && d.getMonth() === today.getMonth()
+            && d.getDate() === today.getDate();
+        });
+
+        this.showList = true;
+        this.closeFilterModal();
+
+        if (this.reminders.length === 0) {
+          this.noResultsMessage = 'Ma nincs emlékeztetőd.';
+        } else {
+          this.noResultsMessage = '';
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        this.noResultsMessage = 'Hiba történt a lekérdezésnél.';
+      }
     });
   }
 
@@ -139,7 +190,10 @@ export class Reminder {
 
     this.api.create(payload).subscribe({
       next: () => {
-        if (this.showList) this.applyFilters();
+        // ✅ Ha listában vagyunk, frissítsük: ha Home-ról jöttünk, akkor maradjon "ma"
+        if (this.showList) {
+          this.loadTodayReminders();
+        }
       },
       error: (err) => console.log(err)
     });
@@ -156,7 +210,9 @@ export class Reminder {
 
     this.api.update(this.selected.id, payload).subscribe({
       next: () => {
-        if (this.showList) this.applyFilters();
+        if (this.showList) {
+          this.loadTodayReminders();
+        }
       },
       error: (err) => console.log(err)
     });
@@ -168,7 +224,9 @@ export class Reminder {
 
     this.api.delete(r.id).subscribe({
       next: () => {
-        if (this.showList) this.applyFilters();
+        if (this.showList) {
+          this.loadTodayReminders();
+        }
       },
       error: (err) => console.log(err)
     });

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ShoppingListService } from '../../../services/shopping-list-service';
 
 @Component({
@@ -25,10 +25,29 @@ export class ShoppingList {
 
   noResultsMessage = '';
 
-  constructor(private api: ShoppingListService, private builder: FormBuilder) {}
+  constructor(
+    private api: ShoppingListService,
+    private builder: FormBuilder,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.initForms();
+
+    // ✅ Ha Home-ról jövünk → automatikus lista (nincs megvéve)
+    this.route.queryParams.subscribe((params: any) => {
+      if (params?.fromHome) {
+        this.filterForm.patchValue({
+          titleMode: 'all',
+          titleText: '',
+          periodMonths: 'all',
+          boughtMode: 'false',
+          expiryMode: 'all'
+        });
+
+        this.applyFilters();
+      }
+    });
   }
 
   initForms() {
@@ -183,7 +202,6 @@ export class ShoppingList {
   }
 
   private cleanPayload(v: any) {
-    // üres dátumokat null-ra (Sequelize szereti így)
     const purchaseDate = v.purchaseDate ? v.purchaseDate : null;
     const expiryDate = v.expiryDate ? v.expiryDate : null;
 
