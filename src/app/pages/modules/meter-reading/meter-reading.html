@@ -1,44 +1,56 @@
-<br>
-<h1>MÉRŐÓRA LEOLVASÁSOK</h1>
-<br><br>
+<div class="cf-page cf-mr">
 
-<button (click)="startShowModal()" class="btn btn-primary me-2">Új leolvasás</button>
-<button (click)="openFilterModal()" class="btn btn-secondary">Leolvasásaim</button>
+  <div class="cf-header">
+    <h1 class="cf-title">MÉRŐÓRA LEOLVASÁSOK</h1>
 
-<br><br>
-
-@if(noResultsMessage){
-  <div class="alert alert-warning">
-    {{ noResultsMessage }}
+    <div class="cf-actions">
+      <button (click)="startShowModal()" class="btn btn-primary me-2">Új leolvasás</button>
+      <button (click)="openFilterModal()" class="btn btn-secondary">Leolvasásaim</button>
+    </div>
   </div>
-}
 
-@if(showList){
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Típus</th>
-        <th>Leolvasás</th>
-        <th>Dátum</th>
-        <th>Műveletek</th>
-      </tr>
-    </thead>
+  @if(noResultsMessage){
+    <div class="alert alert-warning cf-alert">
+      {{ noResultsMessage }}
+    </div>
+  }
 
-    <tbody>
-      @for(r of readings; track r.id) {
-        <tr>
-          <td>{{ r.meterType }}</td>
-          <td>{{ r.reading }}</td>
-          <td>{{ r.date | date:'yyyy. MM. dd.' }}</td>
-          <td>
-            <button class="btn btn-sm btn-warning me-2" (click)="startEdit(r)">Módosítás</button>
-            <button class="btn btn-sm btn-danger" (click)="startDelete(r)">Törlés</button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
+  @if(showList){
+    <div class="cf-card">
+      <div class="cf-table">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Típus</th>
+              <th>Leolvasás</th>
+              <th>Dátum</th>
+              <th class="text-end">Műveletek</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for(r of readings; track r.id) {
+              <tr>
+                <td>{{ r.meterType }}</td>
+                <td>{{ r.reading }}</td>
+                <td>{{ r.date | date:'yyyy. MM. dd.' }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-warning me-2" (click)="startEdit(r)">Módosítás</button>
+                  <button class="btn btn-sm btn-danger" (click)="startDelete(r)">Törlés</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <div class="cf-footer">
+    <a routerLink="/home">← vissza a főoldalra</a>
+  </div>
+
+</div>
 
 <!-- ✅ SZŰRŐ MODAL -->
 @if(showFilterModal){
@@ -78,7 +90,6 @@
                 <option value="12">1 év</option>
                 <option value="all">Összes</option>
               </select>
-
             </div>
 
           </form>
@@ -139,9 +150,3 @@
 
   <div class="modal-backdrop fade show"></div>
 }
-
-<br><br><br>
-
-<p>
-  <a routerLink="/home">vissza a főoldalra</a>
-</p>

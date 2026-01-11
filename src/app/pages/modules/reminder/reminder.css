@@ -1,0 +1,82 @@
+/* ===== Reminders page layout ===== */
+
+.cf-page.cf-rem{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.cf-page.cf-rem .cf-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.cf-page.cf-rem .cf-title{
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.cf-page.cf-rem .cf-actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-page.cf-rem .cf-alert{
+  margin-top: 12px;
+  border-radius: 12px;
+}
+
+.cf-page.cf-rem .cf-card{
+  margin-top: 18px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.cf-page.cf-rem .table{
+  margin: 0;
+}
+
+.cf-page.cf-rem .table thead th{
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cf-page.cf-rem .table td{
+  vertical-align: middle;
+}
+
+.cf-page.cf-rem .cf-footer{
+  margin-top: 28px;
+  text-align: center;
+}
+
+/* Mobil */
+@media (max-width: 768px){
+  .cf-page.cf-rem .cf-header{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cf-page.cf-rem .cf-actions{
+    width: 100%;
+  }
+
+  .cf-page.cf-rem .cf-actions .btn{
+    width: 100%;
+  }
+
+  .cf-page.cf-rem .cf-table{
+    overflow-x: auto;
+  }
+  .cf-page.cf-rem .cf-table table{
+    min-width: 720px;
+  }
+}

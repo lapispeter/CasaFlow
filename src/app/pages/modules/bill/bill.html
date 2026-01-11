@@ -1,48 +1,58 @@
-<br>
-<h1>SZÁMLÁK</h1>
-<br><br>
+<div class="cf-page">
 
-<button (click)="startShowModal()" class="btn btn-primary me-2">Új számla</button>
-<button (click)="openFilterModal()" class="btn btn-secondary">Számláim</button>
+  <div class="cf-header">
+    <h1 class="cf-title">SZÁMLÁK</h1>
 
-<br><br>
-
-<!-- Üzenet, ha nincs találat -->
-@if(noResultsMessage){
-  <div class="alert alert-warning">
-    {{ noResultsMessage }}
+    <div class="cf-actions">
+      <button (click)="startShowModal()" class="btn btn-primary me-2">Új számla</button>
+      <button (click)="openFilterModal()" class="btn btn-secondary">Számláim</button>
+    </div>
   </div>
-}
 
-<!-- Lista csak akkor jelenjen meg, ha már lekérdezte -->
-@if(showList){
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Számlatípus</th>
-        <th>Fizetendő összeg</th>
-        <th>Határidő</th>
-        <th>Fizetve</th>
-        <th>Műveletek</th>
-      </tr>
-    </thead>
+  <!-- Üzenet, ha nincs találat -->
+  @if(noResultsMessage){
+    <div class="alert alert-warning cf-alert">
+      {{ noResultsMessage }}
+    </div>
+  }
 
-    <tbody>
-      @for(bill of bills; track bill.id) {
-        <tr>
-          <td>{{ bill.billType }}</td>
-          <td>{{ bill.amount }}</td>
-          <td>{{ bill.date | date:'yyyy. MM. dd.' }}</td>
-          <td>{{ bill.paymentStatus }}</td>
-          <td>
-            <button class="btn btn-sm btn-warning me-2" (click)="startEdit(bill)">Módosítás</button>
-            <button class="btn btn-sm btn-danger" (click)="startDelete(bill)">Törlés</button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
+  <!-- Lista csak akkor jelenjen meg, ha már lekérdezte -->
+  @if(showList){
+    <div class="cf-card">
+      <div class="cf-table">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Számlatípus</th>
+              <th>Fizetendő összeg</th>
+              <th>Határidő</th>
+              <th>Fizetve</th>
+              <th class="text-end">Műveletek</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for(bill of bills; track bill.id) {
+              <tr>
+                <td>{{ bill.billType }}</td>
+                <td>{{ bill.amount }}</td>
+                <td>{{ bill.date | date:'yyyy. MM. dd.' }}</td>
+                <td>
+                  <span class="cf-status" [class.is-paid]="bill.paymentStatus === 'Igen'" [class.is-unpaid]="bill.paymentStatus === 'Nem'">
+                    {{ bill.paymentStatus }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-warning me-2" (click)="startEdit(bill)">Módosítás</button>
+                  <button class="btn btn-sm btn-danger" (click)="startDelete(bill)">Törlés</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
 
 <!-- ✅ SZŰRŐ MODAL -->
 @if(showFilterModal){
@@ -160,6 +170,6 @@
 }
 
 <br><br><br>
-<p>
-  <a routerLink="/home">vissza a főoldalra</a>
-</p>
+<div class="cf-footer">
+    <a routerLink="/home">← vissza a főoldalra</a>
+  </div>

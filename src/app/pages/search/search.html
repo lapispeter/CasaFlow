@@ -1,0 +1,34 @@
+<div class="cf-page cf-search">
+  <div class="cf-header">
+    <h1 class="cf-title">Keresés</h1>
+    <p class="cf-subtitle">Keresett kifejezés: <strong>{{ q }}</strong></p>
+  </div>
+
+  @if(!q){
+    <div class="cf-card">
+      <p>Írj be valamit a keresőbe a fejlécben.</p>
+    </div>
+  }
+
+  @if(q && results.length === 0){
+    <div class="cf-card">
+      <p>Nincs találat erre: <strong>{{ q }}</strong></p>
+    </div>
+  }
+
+  @if(results.length > 0){
+    <div class="cf-card">
+      <div class="cf-list">
+        @for(r of results; track r.path){
+          <a class="cf-item" [routerLink]="r.path">
+            {{ r.label }}
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="cf-footer">
+    <a routerLink="/home">← vissza a főoldalra</a>
+  </div>
+</div>

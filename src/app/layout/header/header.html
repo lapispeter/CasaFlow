@@ -1,0 +1,57 @@
+<header class="app-header">
+
+<div class="logo">
+  <img src="/images/favicon.png" alt="CasaFlow" />
+</div>
+
+
+  <ng-container *ngIf="isLoggedIn$ | async">
+
+    <div class="search">
+      <form class="search-form" (ngSubmit)="onSearch()" autocomplete="off">
+        <input
+          type="text"
+          placeholder="Keresés"
+          name="q"
+          [(ngModel)]="query"
+          class="search-input"
+        />
+        <button type="submit" class="search-btn" aria-label="Keresés">⌕</button>
+      </form>
+    </div>
+
+    <div class="actions">
+      <button class="icon-btn" aria-label="Menü" (click)="toggleMenu()">☰</button>
+      <button class="icon-btn" aria-label="Kijelentkezés" (click)="auth.logout()">🚪</button>
+    </div>
+
+    <!-- OVERLAY -->
+    <div class="menu-overlay" *ngIf="isMenuOpen" (click)="closeMenu()"></div>
+
+    <!-- DRAWER -->
+    <aside class="menu-drawer" [class.open]="isMenuOpen" aria-label="Főmenü">
+      <div class="drawer-header">
+        <div class="drawer-title">Menü</div>
+        <button class="icon-btn drawer-close" aria-label="Bezárás" (click)="closeMenu()">✕</button>
+      </div>
+
+      <nav class="drawer-nav">
+        <!-- Aktuális oldal ne látszódjon -->
+        @for(item of menuItems; track item.path) {
+          @if(!isCurrent(item.path)) {
+            <a class="drawer-link" [routerLink]="item.path">
+              <span class="drawer-icon">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </a>
+          }
+        }
+      </nav>
+
+      <div class="drawer-footer">
+        <button class="drawer-logout" type="button" (click)="auth.logout()">Kijelentkezés</button>
+      </div>
+    </aside>
+
+  </ng-container>
+
+</header>

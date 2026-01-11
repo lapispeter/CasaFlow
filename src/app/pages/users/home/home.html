@@ -1,23 +1,45 @@
-<h2>Home</h2>
-<p>Sikeres belépés, üdv itthon {{ name }} 💖</p>
-<p>
-  <a routerLink="/profile">Saját adatok karbantartása</a>
-</p>
-<p>
-  <a routerLink="/bill">Számláim</a>
-</p>
-<p>
-  <a routerLink="/meter-reading">Leolvasások</a>
-</p>
+<div class="home-container">
 
-<p>
-  <a routerLink="/reminder">Emlékeztetők</a>
-</p>
+  <!-- KÖSZÖNTÉS -->
+  <section class="home-header">
+    <h1>Szia {{ name }}!</h1>
+    <p class="subtitle">
+      Örülünk, hogy itt vagy. Itt átláthatod a mai teendőidet és a háztartásod aktuális állapotát.
+    </p>
+  </section>
 
-<p>
-  <a routerLink="/shopping-list">Bevásárló lista</a>
-</p>
+  <hr />
 
-<p>
-  <a routerLink="/login">kijelentkezés</a>
-</p>
+  <!-- ÖSSZEFOGLALÓ CSEMPEK -->
+  <section class="quick-stats">
+    <div class="stat-card" (click)="goUnpaidBills()" style="cursor:pointer;">
+      <h3>Számlák</h3>
+      <p>[{{ unpaidBillsCount }}] fizetendő számlád van</p>
+    </div>
+
+    <div class="stat-card" (click)="goTodayReminders()" style="cursor:pointer;">
+      <h3>Emlékeztetők</h3>
+      <p>[{{ todayRemindersCount }}] emlékeztető ma</p>
+    </div>
+
+    <div class="stat-card" (click)="goShoppingOpen()" style="cursor:pointer;">
+      <h3>Bevásárló lista</h3>
+      <p>[{{ shoppingOpenCount }}] tétel van a listán</p>
+    </div>
+  </section>
+
+  <hr />
+
+  <!-- NAVIGÁCIÓS CSEMPEK -->
+  <section class="modules">
+    <a routerLink="/bill" class="module-card">Számlák</a>
+    <a routerLink="/reminder" class="module-card">Emlékeztetők</a>
+    <a routerLink="/shopping-list" class="module-card">Bevásárló lista</a>
+    <a routerLink="/meter-reading" class="module-card">Mérőórák</a>
+  </section>
+
+</div>
+
+<p class="logout">
+  <a (click)="logout()">kijelentkezés</a>
+ </p>

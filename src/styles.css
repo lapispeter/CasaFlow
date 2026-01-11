@@ -1,3 +1,151 @@
 /* You can add global styles to this file, and also import other style files */
 @import "bootstrap";
 @import "bootstrap-icons";
+
+:root {
+  --font-heading: 'Quicksand', sans-serif;
+  --font-body: 'Lato', sans-serif;
+  --font-accent: 'Poppins', serif;
+}
+
+/* Alap szöveg az egész oldalon */
+body {
+  font-family: var(--font-body);
+  color: #222;
+}
+
+/* Alap UI elemek */
+p,
+label,
+input,
+a,
+button {
+  font-family: var(--font-body);
+}
+
+/* Accent font – csak ha külön rárakod */
+.accent-text {
+  font-family: var(--font-accent);
+}
+
+/* ===== CasaFlow Bills page overrides (scoped) ===== */
+
+a[routerLink="/login"]{
+  color: #1f6b57 !important;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+a[routerLink="/login"]:hover{
+  color: #155345 !important;
+  text-decoration: underline;
+}
+
+/* link: ugyanaz a stílus, mint a login oldali zöld link */
+.cf-page .cf-footer a{
+  color: #1f6b57 !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+.cf-page .cf-footer a:hover{
+  color: #155345 !important;
+  text-decoration: underline !important;
+}
+
+/* gombok: Home csempék színei */
+.cf-page .cf-actions .btn.btn-primary{
+  background-color: #3cc9a7 !important;
+  border-color: #3cc9a7 !important;
+  font-weight: 500 !important;
+}
+.cf-page .cf-actions .btn.btn-primary:hover{
+  background-color: #34b397 !important;
+  border-color: #34b397 !important;
+}
+
+.cf-page .cf-actions .btn.btn-secondary{
+  background-color: #5b9a8b !important;
+  border-color: #5b9a8b !important;
+  font-weight: 500 !important;
+}
+.cf-page .cf-actions .btn.btn-secondary:hover{
+  background-color: #4e887b !important;
+  border-color: #4e887b !important;
+}
+
+
+/* ===== CasaFlow MODAL action buttons ===== */
+
+/* Mentés + Lekérdezés – sötétzöld */
+.cf-page .modal .btn-primary,
+.cf-page .modal .btn-success{
+  background-color: #5b9a8b !important;   /* sötétebb CasaFlow zöld */
+  border-color: #5b9a8b !important;
+  font-weight: 500 !important;
+}
+
+/* Hover állapot */
+.cf-page .modal .btn-primary:hover,
+.cf-page .modal .btn-success:hover{
+  background-color: #4e887b !important;
+  border-color: #4e887b !important;
+}
+
+
+/* ===== Meter Reading: Bootstrap overrides (scoped) ===== */
+
+
+/* Modal akciógombok: sötétzöld */
+body:has(.cf-page.cf-mr) .modal .btn-primary,
+body:has(.cf-page.cf-mr) .modal .btn-success{
+  background-color: #5b9a8b !important;
+  border-color: #5b9a8b !important;
+  font-weight: 500 !important;
+}
+
+body:has(.cf-page.cf-mr) .modal .btn-primary:hover,
+body:has(.cf-page.cf-mr) .modal .btn-success:hover{
+  background-color: #4e887b !important;
+  border-color: #4e887b !important;
+}
+
+/* Modal action gombok: Mentés + Lekérdezés sötétzöld
+   (body:has kell, mert a modal nem biztos, hogy a wrapper alatt van) */
+body:has(.cf-page.cf-sl) .modal .btn-primary,
+body:has(.cf-page.cf-sl) .modal .btn-success{
+  background-color: #5b9a8b !important;
+  border-color: #5b9a8b !important;
+  font-weight: 500 !important;
+}
+body:has(.cf-page.cf-sl) .modal .btn-primary:hover,
+body:has(.cf-page.cf-sl) .modal .btn-success:hover{
+  background-color: #4e887b !important;
+  border-color: #4e887b !important;
+}
+
+/* Footer link: CasaFlow finom CTA */
+.cf-page.cf-sl .cf-footer a{
+  color: #1f6b57 !important;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.cf-page.cf-sl .cf-footer a:hover{
+  color: #155345 !important;
+  text-decoration: underline;
+}
+
+/* Footer link: CasaFlow “finom CTA” */
+.cf-page.cf-mr .cf-footer a{
+  color: #1f6b57 !important;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.cf-page.cf-mr .cf-footer a:hover{
+  color: #155345 !important;
+  text-decoration: underline;
+}

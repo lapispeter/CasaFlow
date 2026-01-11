@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
 
 export interface LoginResponse {
   id: number;
@@ -21,9 +23,18 @@ export interface RegisterRequest {
 })
 export class AuthService {
 
+  private loggedInSubject = new BehaviorSubject<boolean>(
+  !!localStorage.getItem('auth')
+);
+
+loggedIn$ = this.loggedInSubject.asObservable();
+
   private apiUrl = 'http://localhost:8000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+  private http: HttpClient,
+  private router: Router
+) {}
 
   login(name: string, password: string): Observable<LoginResponse> {
     console.log('Hívott URL (login):', `${this.apiUrl}/login`);
@@ -117,6 +128,7 @@ export class AuthService {
     // 🌸 Login válasz elmentése (localStorage)
   setSession(res: LoginResponse) {
     localStorage.setItem('auth', JSON.stringify(res));
+    this.loggedInSubject.next(true);
   }
 
   getCurrentUserId(): number | null {
@@ -154,7 +166,14 @@ export class AuthService {
 
 logout() {
   localStorage.removeItem('auth');
+  this.loggedInSubject.next(false);
+  this.router.navigate(['/login']);
+}
+
+isLoggedIn(): boolean {
+  return !!localStorage.getItem('auth');
+}
+
 }
 
 
-}

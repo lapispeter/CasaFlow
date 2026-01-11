@@ -1,0 +1,102 @@
+/* ===== Shopping List page layout ===== */
+
+.cf-page.cf-sl{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.cf-page.cf-sl .cf-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.cf-page.cf-sl .cf-title{
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.cf-page.cf-sl .cf-actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-page.cf-sl .cf-alert{
+  margin-top: 12px;
+  border-radius: 12px;
+}
+
+.cf-page.cf-sl .cf-card{
+  margin-top: 18px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.cf-page.cf-sl .table{
+  margin: 0;
+}
+
+.cf-page.cf-sl .table thead th{
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cf-page.cf-sl .table td{
+  vertical-align: middle;
+}
+
+/* Igen/Nem “pill” */
+.cf-page.cf-sl .cf-status{
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #e9ecef;
+}
+
+.cf-page.cf-sl .cf-status.is-paid{
+  background: rgba(25, 135, 84, 0.15);
+}
+
+.cf-page.cf-sl .cf-status.is-unpaid{
+  background: rgba(220, 53, 69, 0.15);
+}
+
+/* Footer */
+.cf-page.cf-sl .cf-footer{
+  margin-top: 28px;
+  text-align: center;
+}
+
+/* Mobil */
+@media (max-width: 768px){
+  .cf-page.cf-sl .cf-header{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cf-page.cf-sl .cf-actions{
+    width: 100%;
+  }
+
+  .cf-page.cf-sl .cf-actions .btn{
+    width: 100%;
+  }
+
+  .cf-page.cf-sl .cf-table{
+    overflow-x: auto;
+  }
+  .cf-page.cf-sl .cf-table table{
+    min-width: 980px; /* több oszlop miatt nagyobb */
+  }
+}

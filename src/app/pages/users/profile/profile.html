@@ -1,90 +1,134 @@
-<h2>Saját adatok karbantartása</h2>
+<div class="cf-page">
 
-<a routerLink="/home">Vissza a főoldalra</a>
+  <div class="cf-header">
+    <h2 class="cf-title">Saját adatok karbantartása</h2>
 
-<hr />
+    <div class="cf-actions">
+      <a routerLink="/home" class="cf-link">Vissza a főoldalra</a>
+    </div>
+  </div>
 
-<!-- Profil adatok (név + email) -->
+  <!-- ====== Alapadatok ====== -->
+  <div class="cf-card">
+    <div class="cf-card-header">
+      <h3 class="cf-card-title">Alapadatok</h3>
+      <p class="cf-card-subtitle">Itt tudod frissíteni a nevedet és az email címedet.</p>
+    </div>
 
-<h3>Alapadatok</h3>
+    <div class="cf-card-body">
 
-<div *ngIf="isLoadingProfile">
-  Profil adatok betöltése…
+      <div *ngIf="isLoadingProfile" class="cf-muted">
+        Profil adatok betöltése…
+      </div>
+
+      <div *ngIf="!isLoadingProfile">
+        <form (ngSubmit)="onSaveProfile()" class="cf-form">
+
+          <div class="cf-field">
+            <label>Felhasználónév</label>
+            <input
+              type="text"
+              name="name"
+              [(ngModel)]="name"
+              class="cf-input"
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="cf-field">
+            <label>Email cím</label>
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              class="cf-input"
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="cf-form-actions">
+            <button type="submit" class="cf-btn" [disabled]="isSavingProfile">
+              {{ isSavingProfile ? 'Mentés...' : 'Adatok mentése' }}
+            </button>
+          </div>
+
+        </form>
+
+        <p *ngIf="profileSuccess" class="cf-message success">
+          {{ profileSuccess }}
+        </p>
+
+        <p *ngIf="profileError" class="cf-message error">
+          {{ profileError }}
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ====== Jelszó módosítás ====== -->
+  <div class="cf-card">
+    <div class="cf-card-header">
+      <h3 class="cf-card-title">Jelszó megváltoztatása</h3>
+      <p class="cf-card-subtitle">Biztonsági okokból add meg a régi jelszavadat is.</p>
+    </div>
+
+    <div class="cf-card-body">
+      <form (ngSubmit)="onChangePassword()" class="cf-form">
+
+        <div class="cf-field">
+          <label>Régi jelszó</label>
+          <input
+            type="password"
+            name="oldPassword"
+            [(ngModel)]="oldPassword"
+            class="cf-input"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <div class="cf-field">
+          <label>Új jelszó</label>
+          <input
+            type="password"
+            name="newPassword"
+            [(ngModel)]="newPassword"
+            class="cf-input"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <div class="cf-field">
+          <label>Új jelszó megerősítése</label>
+          <input
+            type="password"
+            name="newPasswordConfirm"
+            [(ngModel)]="newPasswordConfirm"
+            class="cf-input"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <div class="cf-form-actions">
+          <button type="submit" class="cf-btn" [disabled]="isChangingPassword">
+            {{ isChangingPassword ? 'Mentés...' : 'Jelszó módosítása' }}
+          </button>
+        </div>
+
+      </form>
+
+      <p *ngIf="passwordSuccess" class="cf-message success">
+        {{ passwordSuccess }}
+      </p>
+
+      <p *ngIf="passwordError" class="cf-message error">
+        {{ passwordError }}
+      </p>
+    </div>
+  </div>
+
+  <div class="cf-footer">
+    <a routerLink="/login">Vissza a belépéshez</a>
+  </div>
+
 </div>
-
-<div *ngIf="!isLoadingProfile">
-
-  <form (ngSubmit)="onSaveProfile()">
-    <label>Felhasználónév</label>
-    <input
-      type="text"
-      name="name"
-      [(ngModel)]="name"
-    />
-
-    <label>Email cím</label>
-    <input
-      type="email"
-      name="email"
-      [(ngModel)]="email"
-    />
-
-    <button type="submit" [disabled]="isSavingProfile">
-      Adatok mentése
-    </button>
-  </form>
-
-  <p *ngIf="profileSuccess">
-    {{ profileSuccess }}
-  </p>
-
-  <p *ngIf="profileError">
-    {{ profileError }}
-  </p>
-</div>
-
-<hr />
-
-<!-- Jelszó módosítás -->
-
-<h3>Jelszó megváltoztatása</h3>
-
-<form (ngSubmit)="onChangePassword()">
-  <label>Régi jelszó</label>
-  <input
-    type="password"
-    name="oldPassword"
-    [(ngModel)]="oldPassword"
-  />
-
-  <label>Új jelszó</label>
-  <input
-    type="password"
-    name="newPassword"
-    [(ngModel)]="newPassword"
-  />
-
-  <label>Új jelszó megerősítése</label>
-  <input
-    type="password"
-    name="newPasswordConfirm"
-    [(ngModel)]="newPasswordConfirm"
-  />
-
-  <button type="submit" [disabled]="isChangingPassword">
-    Jelszó módosítása
-  </button>
-</form>
-
-<p *ngIf="passwordSuccess">
-  {{ passwordSuccess }}
-</p>
-
-<p *ngIf="passwordError">
-  {{ passwordError }}
-</p>
-
-<p>
-  <a routerLink="/">Vissza a belépéshez</a>
-</p>
-

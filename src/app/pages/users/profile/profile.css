@@ -1,0 +1,191 @@
+/* ====== PAGE LAYOUT ====== */
+.cf-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.cf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.cf-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* akciók */
+.cf-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-link {
+  text-decoration: none;
+  font-weight: 600;
+  color: #165f4b;
+}
+
+.cf-link:hover {
+  text-decoration: underline;
+}
+
+/* ====== CARD ====== */
+.cf-card {
+  margin-top: 18px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.cf-card-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.cf-card-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-heading);
+}
+
+.cf-card-subtitle {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: #777;
+}
+
+.cf-card-body {
+  padding: 18px;
+}
+
+.cf-muted {
+  color: #777;
+  font-size: 14px;
+}
+
+/* ====== FORM ====== */
+.cf-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cf-field label {
+  font-size: 14px;
+}
+
+.cf-input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  background-color: #f3f2f2;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cf-input:focus {
+  outline: none;
+  border-color: #165f4b;
+  box-shadow: 0 0 0 2px rgba(22, 95, 75, 0.15);
+}
+
+/* gomb sor */
+.cf-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.cf-btn {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  background-color: #165f4b;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s, opacity 0.2s;
+  min-width: 180px;
+}
+
+.cf-btn:hover {
+  background-color: #0f4436;
+}
+
+.cf-btn:active {
+  transform: translateY(1px);
+}
+
+.cf-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ====== MESSAGES ====== */
+.cf-message {
+  margin: 12px 0 0 0;
+  font-size: 14px;
+}
+
+.cf-message.success {
+  color: #165f4b;
+  font-weight: 600;
+}
+
+.cf-message.error {
+  color: #b00020;
+  font-weight: 600;
+}
+
+/* ====== FOOTER LINK ====== */
+.cf-footer {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.cf-footer a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #165f4b;
+}
+
+.cf-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .cf-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cf-actions {
+    width: 100%;
+  }
+
+  .cf-form {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-btn {
+    width: 100%;
+  }
+}

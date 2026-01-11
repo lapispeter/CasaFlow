@@ -36,4 +36,7 @@ export const routes: Routes = [
   { path: 'reminder', component: Reminder },
 
   { path: 'shopping-list', component: ShoppingList },
+
+  { path: 'search', loadComponent: () => import('./pages/search/search').then(m => m.Search)},
+
 ];
