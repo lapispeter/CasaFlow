@@ -11,6 +11,11 @@ import { ShoppingListService } from '../../../services/shopping-list-service';
   styleUrl: './shopping-list.css',
 })
 export class ShoppingList {
+
+  successMessage = '';
+  errorMessage = '';
+  isSaving = false;
+
   items: any[] = [];
 
   itemForm: any;
@@ -25,6 +30,12 @@ export class ShoppingList {
 
   noResultsMessage = '';
 
+  // ✅ globális keresőből érkező "kiemelendő" találat
+  focusId: number | null = null;
+
+  // ✅ globális keresőből érkező q (külön tároljuk, mert NEM a backend "custom" szűrését használjuk)
+  searchQ = '';
+
   constructor(
     private api: ShoppingListService,
     private builder: FormBuilder,
@@ -34,9 +45,31 @@ export class ShoppingList {
   ngOnInit() {
     this.initForms();
 
-    // ✅ Ha Home-ról jövünk → automatikus lista (nincs megvéve)
     this.route.queryParams.subscribe((params: any) => {
+      const q = String(params?.q ?? '').trim();
+      const focusIdRaw = params?.focusId;
+
+      this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
+      this.searchQ = q;
+
+      // ✅ Ha keresőből jövünk:
+      // Nem "custom"-ot használunk, hanem "all"-t, és mi szűrünk a frontendben.
+      if (q) {
+        this.filterForm.patchValue({
+          titleMode: 'all',
+          titleText: '',
+          periodMonths: 'all',
+          boughtMode: 'all',
+          expiryMode: 'all'
+        });
+
+        this.applyFilters();
+        return;
+      }
+
+      // ✅ Ha Home-ról jövünk
       if (params?.fromHome) {
+        this.searchQ = '';
         this.filterForm.patchValue({
           titleMode: 'all',
           titleText: '',
@@ -51,7 +84,6 @@ export class ShoppingList {
   }
 
   initForms() {
-    // CRUD
     this.itemForm = this.builder.group({
       title: [''],
       note: [''],
@@ -62,13 +94,12 @@ export class ShoppingList {
       isBought: [false]
     });
 
-    // Filter
     this.filterForm = this.builder.group({
-      titleMode: ['all'],      // all | custom
+      titleMode: ['all'],
       titleText: [''],
-      periodMonths: ['all'],   // '1'|'3'|'6'|'12'|'all'
-      boughtMode: ['all'],     // 'all'|'true'|'false'
-      expiryMode: ['all']      // 'all'|onlyWithExpiry|expired|expiringSoon
+      periodMonths: ['all'],
+      boughtMode: ['all'],
+      expiryMode: ['all']
     });
   }
 
@@ -85,29 +116,47 @@ export class ShoppingList {
   applyFilters() {
     const f = this.filterForm.value;
 
-    const titleText =
-      f.titleMode === 'custom'
-        ? String(f.titleText ?? '').trim()
-        : '';
-
+    // innen kezdve: backend "all", plusz a saját keresés (ha van searchQ)
     this.api.getFiltered({
-      titleMode: f.titleMode,
-      titleText,
+      titleMode: String(f.titleMode),
+      titleText: String(f.titleText ?? ''),
       periodMonths: String(f.periodMonths),
       boughtMode: String(f.boughtMode),
       expiryMode: String(f.expiryMode)
     }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
-        this.items = Array.isArray(list) ? list : [];
+        const allItems = Array.isArray(list) ? list : [];
+
+        // ✅ frontend keresés: kis/nagybetű, ékezet, contains
+        if (this.searchQ) {
+          const needleParts = this.normalizeText(this.searchQ).split(/\s+/).filter(Boolean);
+
+          this.items = allItems.filter((x: any) => {
+            const hay = this.normalizeText(`${x?.title ?? ''} ${x?.note ?? ''} ${x?.unit ?? ''} ${x?.quantity ?? ''}`);
+            return needleParts.every(p => hay.includes(p));
+          });
+
+          this.showList = true;
+          this.closeFilterModal();
+
+          if (this.items.length === 0) {
+            this.noResultsMessage = `Nincs találat erre: "${this.searchQ}".`;
+          } else {
+            this.noResultsMessage = '';
+          }
+
+          return;
+        }
+
+        // ✅ ha nincs globális q, akkor simán a backend szűrés eredménye
+        this.items = allItems;
 
         this.showList = true;
         this.closeFilterModal();
 
         if (this.items.length === 0) {
-          this.noResultsMessage = titleText
-            ? `Nincs ilyen nevű tétel: "${titleText}".`
-            : 'Nincs találat a megadott szűrésre.';
+          this.noResultsMessage = 'Nincs találat a megadott szűrésre.';
         } else {
           this.noResultsMessage = '';
         }
@@ -160,32 +209,52 @@ export class ShoppingList {
   }
 
   startSave() {
+    if (this.isSaving) return;
+
     this.showModal = false;
+
     if (this.addMode) this.startAdd();
     else this.startUpdate();
   }
 
   startAdd() {
+    if (this.isSaving) return;
+    this.isSaving = true;
+
     const payload = this.cleanPayload(this.itemForm.value);
 
     this.api.create(payload).subscribe({
       next: () => {
+        this.showSuccess('Sikeres rögzítés ✅');
         if (this.showList) this.applyFilters();
+        this.isSaving = false;
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a mentésnél.');
+        this.isSaving = false;
+      }
     });
   }
 
   startUpdate() {
     if (!this.selected?.id) return;
+    if (this.isSaving) return;
+    this.isSaving = true;
 
     const payload = this.cleanPayload(this.itemForm.value);
 
     this.api.update(this.selected.id, payload).subscribe({
       next: () => {
+        this.showSuccess('Sikeres módosítás ✅');
         if (this.showList) this.applyFilters();
+        this.isSaving = false;
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a módosításnál.');
+        this.isSaving = false;
+      }
     });
   }
 
@@ -195,10 +264,26 @@ export class ShoppingList {
 
     this.api.delete(i.id).subscribe({
       next: () => {
+        this.showSuccess('Sikeres törlés ✅');
         if (this.showList) this.applyFilters();
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a törlésnél.');
+      }
     });
+  }
+
+  private showSuccess(msg: string) {
+    this.successMessage = msg;
+    this.errorMessage = '';
+    setTimeout(() => (this.successMessage = ''), 2500);
+  }
+
+  private showError(msg: string) {
+    this.errorMessage = msg;
+    this.successMessage = '';
+    setTimeout(() => (this.errorMessage = ''), 4000);
   }
 
   private cleanPayload(v: any) {
@@ -224,5 +309,13 @@ export class ShoppingList {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private normalizeText(s: string): string {
+    return String(s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
   }
 }

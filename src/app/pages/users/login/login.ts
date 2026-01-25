@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],   // 💎 HOZZÁADVA: RouterLink
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
@@ -21,18 +21,18 @@ export class Login {
   ) {}
 
   onLogin() {
-    console.log('Belépés próbálkozás…');    
+    console.log('Belépés próbálkozás…');
 
     this.authService.login(this.username, this.password).subscribe({
-  next: (res) => {
-    console.log('Sikeres bejelentkezés! 🎉');
-    console.log('Válasz:', res);
+      next: (res) => {
+        console.log('Sikeres bejelentkezés! 🎉');
+        console.log('Válasz:', res);
 
-    // 🌸 Login adatokat elmentjük
-    this.authService.setSession(res);
+        // Login adatokat elmentjük
+        this.authService.setSession(res);
 
-    this.router.navigate(['/home']);
-  },
+        this.router.navigate(['/home']);
+      },
       error: (err) => {
         console.error('Hiba a bejelentkezésnél 😥', err);
       }

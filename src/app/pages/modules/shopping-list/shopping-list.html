@@ -9,6 +9,18 @@
     </div>
   </div>
 
+  @if(successMessage){
+    <div class="alert alert-success cf-alert">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if(errorMessage){
+    <div class="alert alert-danger cf-alert">
+      {{ errorMessage }}
+    </div>
+  }
+
   @if(noResultsMessage){
     <div class="alert alert-warning cf-alert">
       {{ noResultsMessage }}
@@ -78,7 +90,7 @@
           <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" id="filterForm">
 
             <div class="form-group">
-              <label class="form-label">Cím</label>
+              <label class="form-label">Termék neve</label>
               <select class="form-select" formControlName="titleMode">
                 <option value="all">Összes</option>
                 <option value="custom">Kézzel megadom</option>
@@ -152,7 +164,7 @@
           <form [formGroup]="itemForm" (ngSubmit)="startSave()" id="itemForm">
 
             <div class="form-group">
-              <label class="form-label">Cím</label>
+              <label class="form-label">Termék neve</label>
               <input type="text" class="form-control" formControlName="title" />
             </div>
 
@@ -194,7 +206,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="cancel()">Bezárás</button>
-          <button type="submit" class="btn btn-primary" form="itemForm">Mentés</button>
+          <button type="submit" class="btn btn-primary" form="itemForm" [disabled]="isSaving">Mentés</button>
         </div>
 
       </div>
@@ -203,4 +215,3 @@
 
   <div class="modal-backdrop fade show"></div>
 }
-

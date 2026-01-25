@@ -19,7 +19,7 @@
         Hozd létre a fiókodat, hogy el tudd kezdeni a CasaFlow használatát.
       </p>
 
-      <form (ngSubmit)="onRegister()" class="login-form">
+      <form #f="ngForm" (ngSubmit)="onRegister(f)" class="login-form" novalidate>
 
         <div class="form-group">
           <label>Felhasználónév</label>
@@ -27,10 +27,23 @@
             type="text"
             name="name"
             [(ngModel)]="name"
-            placeholder="pl. Barbara"
+            #nameModel="ngModel"
+            placeholder="pl. Gergely Barbara"
             autocomplete="name"
             required
+            minlength="3"
+            maxlength="30"
+            pattern="^[a-zA-Z0-9ÁÉÍÓÖŐÚÜŰáéíóöőúüű ._-]+$"
           />
+
+          <small class="field-error" *ngIf="nameModel.touched && nameModel.invalid">
+            <span *ngIf="nameModel.errors?.['required']">A felhasználónév kötelező.</span>
+            <span *ngIf="nameModel.errors?.['minlength']">Minimum 3 karakter.</span>
+            <span *ngIf="nameModel.errors?.['maxlength']">Maximum 30 karakter.</span>
+            <span *ngIf="nameModel.errors?.['pattern']">
+              Csak betű/szám, szóköz és . _ - karakterek használhatók.
+            </span>
+          </small>
         </div>
 
         <div class="form-group">
@@ -39,10 +52,18 @@
             type="email"
             name="email"
             [(ngModel)]="email"
+            #emailModel="ngModel"
             placeholder="hello@casaflow.com"
             autocomplete="email"
             required
+            email
+            maxlength="254"
           />
+
+          <small class="field-error" *ngIf="emailModel.touched && emailModel.invalid">
+            <span *ngIf="emailModel.errors?.['required']">Az email kötelező.</span>
+            <span *ngIf="emailModel.errors?.['email']">Hibás email formátum (pl. valami@domain.com).</span>
+          </small>
         </div>
 
         <div class="form-group">
@@ -51,10 +72,17 @@
             type="password"
             name="password"
             [(ngModel)]="password"
+            #passwordModel="ngModel"
             placeholder="••••••"
             autocomplete="new-password"
             required
+            minlength="6"
           />
+
+          <small class="field-error" *ngIf="passwordModel.touched && passwordModel.invalid">
+            <span *ngIf="passwordModel.errors?.['required']">A jelszó kötelező.</span>
+            <span *ngIf="passwordModel.errors?.['minlength']">Minimum 6 karakter.</span>
+          </small>
         </div>
 
         <div class="form-group">
@@ -63,16 +91,30 @@
             type="password"
             name="passwordConfirmation"
             [(ngModel)]="passwordConfirmation"
+            #password2Model="ngModel"
             placeholder="••••••"
             autocomplete="new-password"
             required
+            minlength="6"
           />
+
+          <small class="field-error" *ngIf="password2Model.touched && password2Model.invalid">
+            <span *ngIf="password2Model.errors?.['required']">A megerősítés kötelező.</span>
+            <span *ngIf="password2Model.errors?.['minlength']">Minimum 6 karakter.</span>
+          </small>
+
+          <small
+            class="field-error"
+            *ngIf="password2Model.touched && password && passwordConfirmation && (password !== passwordConfirmation)"
+          >
+            A két jelszó nem egyezik.
+          </small>
         </div>
 
         <button
           type="submit"
           class="login-button"
-          [disabled]="isSubmitting"
+          [disabled]="isSubmitting || f.invalid || (password !== passwordConfirmation)"
         >
           {{ isSubmitting ? 'Folyamatban...' : 'Regisztráció' }}
         </button>

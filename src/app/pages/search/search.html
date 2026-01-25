@@ -1,7 +1,15 @@
 <div class="cf-page cf-search">
   <div class="cf-header">
     <h1 class="cf-title">Keresés</h1>
-    <p class="cf-subtitle">Keresett kifejezés: <strong>{{ q }}</strong></p>
+    <p class="cf-subtitle">
+      Keresett kifejezés: <strong>{{ q }}</strong>
+      @if(isLoading){
+        <span> (keresés…)</span>
+      }
+      @if(!isLoading && q && total > 0){
+        <span> (találat: {{ total }})</span>
+      }
+    </p>
   </div>
 
   @if(!q){
@@ -10,18 +18,82 @@
     </div>
   }
 
-  @if(q && results.length === 0){
+  @if(q && !isLoading && total === 0){
     <div class="cf-card">
       <p>Nincs találat erre: <strong>{{ q }}</strong></p>
     </div>
   }
 
-  @if(results.length > 0){
+  @if(groups.shopping.length > 0){
     <div class="cf-card">
+      <h2 style="margin: 0 0 12px;">Bevásárló lista</h2>
+
       <div class="cf-list">
-        @for(r of results; track r.path){
-          <a class="cf-item" [routerLink]="r.path">
-            {{ r.label }}
+        @for(r of groups.shopping; track trackHit($index, r)){
+          <a class="cf-item" [routerLink]="r.path" [queryParams]="r.queryParams ?? null">
+            <div>{{ r.title }}</div>
+            @if(r.subtitle){
+              <div style="font-weight: 400; opacity: 0.85; margin-top: 4px;">
+                {{ r.subtitle }}
+              </div>
+            }
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  @if(groups.reminders.length > 0){
+    <div class="cf-card">
+      <h2 style="margin: 0 0 12px;">Emlékeztetők</h2>
+
+      <div class="cf-list">
+        @for(r of groups.reminders; track trackHit($index, r)){
+          <a class="cf-item" [routerLink]="r.path" [queryParams]="r.queryParams ?? null">
+            <div>{{ r.title }}</div>
+            @if(r.subtitle){
+              <div style="font-weight: 400; opacity: 0.85; margin-top: 4px;">
+                {{ r.subtitle }}
+              </div>
+            }
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  @if(groups.bills.length > 0){
+    <div class="cf-card">
+      <h2 style="margin: 0 0 12px;">Számlák</h2>
+
+      <div class="cf-list">
+        @for(r of groups.bills; track trackHit($index, r)){
+          <a class="cf-item" [routerLink]="r.path" [queryParams]="r.queryParams ?? null">
+            <div>{{ r.title }}</div>
+            @if(r.subtitle){
+              <div style="font-weight: 400; opacity: 0.85; margin-top: 4px;">
+                {{ r.subtitle }}
+              </div>
+            }
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  @if(groups.meters.length > 0){
+    <div class="cf-card">
+      <h2 style="margin: 0 0 12px;">Mérőóra leolvasások</h2>
+
+      <div class="cf-list">
+        @for(r of groups.meters; track trackHit($index, r)){
+          <a class="cf-item" [routerLink]="r.path" [queryParams]="r.queryParams ?? null">
+            <div>{{ r.title }}</div>
+            @if(r.subtitle){
+              <div style="font-weight: 400; opacity: 0.85; margin-top: 4px;">
+                {{ r.subtitle }}
+              </div>
+            }
           </a>
         }
       </div>

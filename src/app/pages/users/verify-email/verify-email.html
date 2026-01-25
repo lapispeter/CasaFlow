@@ -1,14 +1,43 @@
-<h2>Email megerősítés</h2>
+<div class="login-page">
 
-<p *ngIf="message && !error">
-  {{ message }}
-</p>
+  <!-- BAL OLDAL -->
+  <div class="login-left">
+    <div class="brand">
+      <img src="/images/logo.png" alt="CasaFlow logo" class="brand-logo" />
+      <h1 class="brand-title">CasaFlow</h1>
+      <p class="brand-subtitle">Digitális háztartásmenedzser</p>
+    </div>
+  </div>
 
-<p *ngIf="error">
-  {{ error }}
-</p>
+  <!-- JOBB OLDAL -->
+  <div class="login-right">
+    <div class="login-card">
 
-<p>
-  <a routerLink="/">Vissza a belépéshez</a>
-</p>
+      <h2 class="login-title">Email megerősítés</h2>
 
+      <p class="helper" *ngIf="isLoading">
+        {{ message }}
+      </p>
+
+      <!-- SIKER -->
+      <div class="message-box success" *ngIf="!isLoading && message && !error">
+        <p class="message-text">{{ message }}</p>
+
+        <a routerLink="/" class="login-button">
+          Belépés
+        </a>
+      </div>
+
+      <!-- HIBA -->
+      <div class="message-box error" *ngIf="!isLoading && error">
+        <p class="message-text">{{ error }}</p>
+
+        <a routerLink="/" class="login-button outline">
+          Vissza a belépéshez
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>

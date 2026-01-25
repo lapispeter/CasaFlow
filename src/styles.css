@@ -149,3 +149,17 @@ body:has(.cf-page.cf-sl) .modal .btn-success:hover{
   color: #155345 !important;
   text-decoration: underline;
 }
+
+
+/* ===== Bill: Modal action buttons (body:has because modal may be outside wrapper) ===== */
+body:has(.cf-page.cf-bill) .modal .btn-primary,
+body:has(.cf-page.cf-bill) .modal .btn-success{
+  background-color: #5b9a8b !important;
+  border-color: #5b9a8b !important;
+  font-weight: 500 !important;
+}
+body:has(.cf-page.cf-bill) .modal .btn-primary:hover,
+body:has(.cf-page.cf-bill) .modal .btn-success:hover{
+  background-color: #4e887b !important;
+  border-color: #4e887b !important;
+}

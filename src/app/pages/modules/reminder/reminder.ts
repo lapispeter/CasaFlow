@@ -25,6 +25,16 @@ export class Reminder {
 
   noResultsMessage = '';
 
+  successMessage = '';
+  errorMessage = '';
+  isSaving = false;
+
+  private isTodayMode = false;
+
+  // ✅ Globális keresőből jövő paramok
+  focusId: number | null = null;
+  searchQ = '';
+
   constructor(
     private api: ReminderService,
     private builder: FormBuilder,
@@ -34,35 +44,53 @@ export class Reminder {
   ngOnInit() {
     this.initForms();
 
-    // ✅ Ha Home-ról jövünk, automatikusan listázza a "mai" emlékeztetőket
     this.route.queryParams.subscribe((params: any) => {
+      const q = String(params?.q ?? '').trim();
+      const focusIdRaw = params?.focusId;
+
+      this.searchQ = q;
+      this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
+
+      // ✅ Ha keresőből jövünk: ez legyen az első
+      if (q) {
+        this.isTodayMode = false;
+
+        this.filterForm.patchValue({
+          titleMode: 'all',
+          titleText: '',
+          periodMonths: 'all'
+        });
+
+        this.applyFilters();
+        return;
+      }
+
+      // ✅ Home-ról: "ma"
       if (params?.fromHome) {
+        this.isTodayMode = true;
         this.loadTodayReminders();
       }
     });
   }
 
   initForms() {
-    // CRUD
     this.reminderForm = this.builder.group({
       title: [''],
       description: [''],
       date: ['']
     });
 
-    // Filter
     this.filterForm = this.builder.group({
-      titleMode: ['all'],      // all | custom
+      titleMode: ['all'], // all | custom
       titleText: [''],
-      periodMonths: ['1']      // '1'|'3'|'6'|'12'|'all'
+      periodMonths: ['1'] // '1'|'3'|'6'|'12'|'all'
     });
   }
 
-  // ✅ Home-ról: "ma" szűrés (frontend)
+  // Home-ról: "ma" szűrés (frontend)
   loadTodayReminders() {
     this.noResultsMessage = '';
 
-    // Lekérjük az összeset, és kiszűrjük mára
     this.api.getFiltered({
       titleMode: 'all',
       titleText: '',
@@ -109,28 +137,51 @@ export class Reminder {
   }
 
   applyFilters() {
+    // ha manuálisan szűr, onnantól nem "ma" mód
+    this.isTodayMode = false;
+
     const f = this.filterForm.value;
 
-    const titleText =
+    const typedText =
       f.titleMode === 'custom'
         ? String(f.titleText ?? '').trim()
         : '';
 
+    const localNeedle = this.searchQ || typedText;
+
+    const apiMode = localNeedle ? 'all' : f.titleMode;
+    const apiText = localNeedle ? '' : typedText;
+
     this.api.getFiltered({
-      titleMode: f.titleMode,
-      titleText,
+      titleMode: String(apiMode),
+      titleText: String(apiText),
       periodMonths: String(f.periodMonths)
     }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
-        this.reminders = Array.isArray(list) ? list : [];
+        const all = Array.isArray(list) ? list : [];
+
+        let filtered = all;
+
+        if (localNeedle) {
+          const parts = this.normalizeText(localNeedle).split(/\s+/).filter(Boolean);
+
+          filtered = all.filter((r: any) => {
+            const hay = this.normalizeText(
+              `${r?.title ?? ''} ${r?.description ?? ''} ${r?.date ?? ''}`
+            );
+            return parts.every(p => hay.includes(p));
+          });
+        }
+
+        this.reminders = filtered;
 
         this.showList = true;
         this.closeFilterModal();
 
         if (this.reminders.length === 0) {
-          this.noResultsMessage = titleText
-            ? `Nincs ilyen című emlékeztetőd: "${titleText}".`
+          this.noResultsMessage = localNeedle
+            ? `Nincs találat erre: "${localNeedle}".`
             : 'Nincs találat a megadott szűrésre.';
         } else {
           this.noResultsMessage = '';
@@ -176,12 +227,17 @@ export class Reminder {
   }
 
   startSave() {
+    if (this.isSaving) return;
+
     this.showModal = false;
     if (this.addMode) this.startAdd();
     else this.startUpdate();
   }
 
   startAdd() {
+    if (this.isSaving) return;
+    this.isSaving = true;
+
     const payload = {
       title: this.reminderForm.value.title,
       description: this.reminderForm.value.description,
@@ -190,17 +246,22 @@ export class Reminder {
 
     this.api.create(payload).subscribe({
       next: () => {
-        // ✅ Ha listában vagyunk, frissítsük: ha Home-ról jöttünk, akkor maradjon "ma"
-        if (this.showList) {
-          this.loadTodayReminders();
-        }
+        this.showSuccess('Sikeres rögzítés ✅');
+        this.refreshListAfterCrud();
+        this.isSaving = false;
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a mentésnél.');
+        this.isSaving = false;
+      }
     });
   }
 
   startUpdate() {
     if (!this.selected?.id) return;
+    if (this.isSaving) return;
+    this.isSaving = true;
 
     const payload = {
       title: this.reminderForm.value.title,
@@ -210,11 +271,15 @@ export class Reminder {
 
     this.api.update(this.selected.id, payload).subscribe({
       next: () => {
-        if (this.showList) {
-          this.loadTodayReminders();
-        }
+        this.showSuccess('Sikeres módosítás ✅');
+        this.refreshListAfterCrud();
+        this.isSaving = false;
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a módosításnál.');
+        this.isSaving = false;
+      }
     });
   }
 
@@ -224,12 +289,33 @@ export class Reminder {
 
     this.api.delete(r.id).subscribe({
       next: () => {
-        if (this.showList) {
-          this.loadTodayReminders();
-        }
+        this.showSuccess('Sikeres törlés ✅');
+        this.refreshListAfterCrud();
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a törlésnél.');
+      }
     });
+  }
+
+  private refreshListAfterCrud() {
+    if (!this.showList) return;
+
+    if (this.isTodayMode) this.loadTodayReminders();
+    else this.applyFilters();
+  }
+
+  private showSuccess(msg: string) {
+    this.successMessage = msg;
+    this.errorMessage = '';
+    setTimeout(() => (this.successMessage = ''), 2500);
+  }
+
+  private showError(msg: string) {
+    this.errorMessage = msg;
+    this.successMessage = '';
+    setTimeout(() => (this.errorMessage = ''), 4000);
   }
 
   private toDateInputValue(dateValue: any): string {
@@ -240,5 +326,13 @@ export class Reminder {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private normalizeText(s: string): string {
+    return String(s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
   }
 }

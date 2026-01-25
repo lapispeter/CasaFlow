@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
-type LinkItem = { label: string; path: string; keywords: string[] };
+import { GlobalSearchService, SearchGroups, SearchHit } from '../../services/global-search.service';
 
 @Component({
   selector: 'app-search',
@@ -16,22 +16,19 @@ export class Search implements OnInit, OnDestroy {
   private sub?: Subscription;
 
   q = '';
-  results: LinkItem[] = [];
+  isLoading = false;
 
-  private all: LinkItem[] = [
-    { label: 'Profil', path: '/profile', keywords: ['profil', 'adatok', 'user'] },
-    { label: 'Számlák', path: '/bill', keywords: ['számla', 'szamlak', 'bill', 'fizetés', 'fizetes'] },
-    { label: 'Mérőóra leolvasások', path: '/meter-reading', keywords: ['mérő', 'mero', 'leolvasás', 'leolvasas', 'óra', 'meter'] },
-    { label: 'Emlékeztetők', path: '/reminder', keywords: ['emlékeztető', 'emlekezteto', 'reminder', 'határidő', 'hatarido'] },
-    { label: 'Bevásárló lista', path: '/shopping-list', keywords: ['bevásárló', 'bevasarlo', 'lista', 'shopping', 'kosár', 'kosar'] },
-  ];
+  groups: SearchGroups = { bills: [], shopping: [], reminders: [], meters: [] };
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private globalSearch: GlobalSearchService
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.route.queryParamMap.subscribe(params => {
       this.q = (params.get('q') ?? '').trim();
-      this.filter();
+      this.runSearch();
     });
   }
 
@@ -39,16 +36,38 @@ export class Search implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  private filter(): void {
-    const needle = this.q.toLowerCase();
-    if (!needle) {
-      this.results = [];
+  get total(): number {
+    return (
+      this.groups.bills.length +
+      this.groups.shopping.length +
+      this.groups.reminders.length +
+      this.groups.meters.length
+    );
+  }
+
+  private runSearch(): void {
+    if (!this.q) {
+      this.groups = { bills: [], shopping: [], reminders: [], meters: [] };
+      this.isLoading = false;
       return;
     }
 
-    this.results = this.all.filter(x => {
-      const hay = (x.label + ' ' + x.keywords.join(' ')).toLowerCase();
-      return hay.includes(needle);
+    this.isLoading = true;
+
+    this.globalSearch.search(this.q).subscribe({
+      next: (res) => {
+        this.groups = res;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.log(err);
+        this.groups = { bills: [], shopping: [], reminders: [], meters: [] };
+        this.isLoading = false;
+      }
     });
+  }
+
+  trackHit(_: number, r: SearchHit) {
+    return `${r.domain}-${r.id}`;
   }
 }

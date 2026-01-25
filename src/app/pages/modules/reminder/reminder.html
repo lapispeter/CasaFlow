@@ -9,6 +9,18 @@
     </div>
   </div>
 
+  @if(successMessage){
+    <div class="alert alert-success cf-alert">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if(errorMessage){
+    <div class="alert alert-danger cf-alert">
+      {{ errorMessage }}
+    </div>
+  }
+
   @if(noResultsMessage){
     <div class="alert alert-warning cf-alert">
       {{ noResultsMessage }}
@@ -135,7 +147,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="cancel()">Bezárás</button>
-          <button type="submit" class="btn btn-primary" form="reminderForm">Mentés</button>
+          <button type="submit" class="btn btn-primary" form="reminderForm" [disabled]="isSaving">Mentés</button>
         </div>
 
       </div>
@@ -146,5 +158,5 @@
 }
 
 <div class="cf-footer">
-    <a routerLink="/home">← vissza a főoldalra</a>
-  </div>
+  <a routerLink="/home">← vissza a főoldalra</a>
+</div>

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MeterReadingService } from '../../../services/meter-reading-service';
 
 @Component({
@@ -25,25 +25,53 @@ export class MeterReading {
 
   noResultsMessage = '';
 
-  constructor(private api: MeterReadingService, private builder: FormBuilder) {}
+  successMessage = '';
+  errorMessage = '';
+  isSaving = false;
+
+  // ✅ Globális keresőből jövő paramok
+  focusId: number | null = null;
+  searchQ = '';
+
+  constructor(
+    private api: MeterReadingService,
+    private builder: FormBuilder,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.initForms();
+
+    this.route.queryParams.subscribe((params: any) => {
+      const q = String(params?.q ?? '').trim();
+      const focusIdRaw = params?.focusId;
+
+      this.searchQ = q;
+      this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
+
+      if (q) {
+        this.filterForm.patchValue({
+          meterTypeMode: 'all',
+          meterTypeText: '',
+          periodMonths: 'all'
+        });
+
+        this.applyFilters();
+      }
+    });
   }
 
   initForms() {
-    // CRUD
     this.mrForm = this.builder.group({
       meterType: [''],
       reading: [''],
       date: ['']
     });
 
-    // Filter
     this.filterForm = this.builder.group({
       meterTypeMode: ['all'],
       meterTypeText: [''],
-      periodMonths: ['1']      // ✅ '1'|'3'|'6'|'12'|'all'
+      periodMonths: ['1'] // '1'|'3'|'6'|'12'|'all'
     });
   }
 
@@ -60,26 +88,46 @@ export class MeterReading {
   applyFilters() {
     const f = this.filterForm.value;
 
-    const meterTypeText =
+    const typedText =
       f.meterTypeMode === 'custom'
         ? String(f.meterTypeText ?? '').trim()
         : '';
 
+    const localNeedle = this.searchQ || typedText;
+
+    const apiMode = localNeedle ? 'all' : f.meterTypeMode;
+    const apiText = localNeedle ? '' : typedText;
+
     this.api.getFiltered({
-      meterTypeMode: f.meterTypeMode,
-      meterTypeText,
+      meterTypeMode: String(apiMode),
+      meterTypeText: String(apiText),
       periodMonths: String(f.periodMonths)
     }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
-        this.readings = Array.isArray(list) ? list : [];
+        const all = Array.isArray(list) ? list : [];
+
+        let filtered = all;
+
+        if (localNeedle) {
+          const parts = this.normalizeText(localNeedle).split(/\s+/).filter(Boolean);
+
+          filtered = all.filter((r: any) => {
+            const hay = this.normalizeText(
+              `${r?.meterType ?? ''} ${r?.reading ?? ''} ${r?.date ?? ''}`
+            );
+            return parts.every(p => hay.includes(p));
+          });
+        }
+
+        this.readings = filtered;
 
         this.showList = true;
         this.closeFilterModal();
 
         if (this.readings.length === 0) {
-          this.noResultsMessage = meterTypeText
-            ? `Nincs ilyen nevű leolvasásod: "${meterTypeText}".`
+          this.noResultsMessage = localNeedle
+            ? `Nincs találat erre: "${localNeedle}".`
             : 'Nincs találat a megadott szűrésre.';
         } else {
           this.noResultsMessage = '';
@@ -125,12 +173,17 @@ export class MeterReading {
   }
 
   startSave() {
+    if (this.isSaving) return;
+
     this.showModal = false;
     if (this.addMode) this.startAdd();
     else this.startUpdate();
   }
 
   startAdd() {
+    if (this.isSaving) return;
+    this.isSaving = true;
+
     const payload = {
       meterType: this.mrForm.value.meterType,
       reading: this.mrForm.value.reading,
@@ -139,14 +192,22 @@ export class MeterReading {
 
     this.api.create(payload).subscribe({
       next: () => {
+        this.showSuccess('Sikeres rögzítés ✅');
         if (this.showList) this.applyFilters();
+        this.isSaving = false;
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a mentésnél.');
+        this.isSaving = false;
+      }
     });
   }
 
   startUpdate() {
     if (!this.selected?.id) return;
+    if (this.isSaving) return;
+    this.isSaving = true;
 
     const payload = {
       meterType: this.mrForm.value.meterType,
@@ -156,9 +217,15 @@ export class MeterReading {
 
     this.api.update(this.selected.id, payload).subscribe({
       next: () => {
+        this.showSuccess('Sikeres módosítás ✅');
         if (this.showList) this.applyFilters();
+        this.isSaving = false;
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a módosításnál.');
+        this.isSaving = false;
+      }
     });
   }
 
@@ -168,10 +235,26 @@ export class MeterReading {
 
     this.api.delete(r.id).subscribe({
       next: () => {
+        this.showSuccess('Sikeres törlés ✅');
         if (this.showList) this.applyFilters();
       },
-      error: (err) => console.log(err)
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a törlésnél.');
+      }
     });
+  }
+
+  private showSuccess(msg: string) {
+    this.successMessage = msg;
+    this.errorMessage = '';
+    setTimeout(() => (this.successMessage = ''), 2500);
+  }
+
+  private showError(msg: string) {
+    this.errorMessage = msg;
+    this.successMessage = '';
+    setTimeout(() => (this.errorMessage = ''), 4000);
   }
 
   private toDateInputValue(dateValue: any): string {
@@ -182,5 +265,13 @@ export class MeterReading {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private normalizeText(s: string): string {
+    return String(s ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
   }
 }
