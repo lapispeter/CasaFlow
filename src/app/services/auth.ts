@@ -7,6 +7,7 @@ export interface LoginResponse {
   id: number;
   name: string;
   email: string;
+  roleId: number;        // ✅ EZ KELL az admin redirecthez
   accessToken: string;
 }
 
@@ -35,10 +36,6 @@ export class AuthService {
     private router: Router
   ) {}
 
-  /**
-   * ✅ Segédfüggvény: backend hibából kiszedi a hasznos üzenetet
-   * (pl. err.error.message vagy err.error.error)
-   */
   getBackendErrorMessage(err: any): string {
     return (
       err?.error?.message ||
@@ -56,19 +53,16 @@ export class AuthService {
     });
   }
 
-  // ✅ Regisztrációs hívás a /register végpontra
   register(data: RegisterRequest): Observable<any> {
     console.log('Hívott URL (register):', `${this.apiUrl}/register`);
     return this.http.post<any>(`${this.apiUrl}/register`, data);
   }
 
-  // ✅ Elfelejtett jelszó – csak emailt küldünk a backendnek
   forgotPassword(email: string) {
     console.log('Hívott URL (forgot-password):', `${this.apiUrl}/forgot-password`);
     return this.http.post<any>(`${this.apiUrl}/forgot-password`, { email });
   }
 
-  // ✅ Új jelszó beállítása a backend /reset-password végpontján
   resetPassword(token: string, password: string, passwordConfirmation: string) {
     return this.http.post<any>(`${this.apiUrl}/reset-password`, {
       token: token,
@@ -77,7 +71,6 @@ export class AuthService {
     });
   }
 
-  // ✅ Profil (user adatok) lekérdezése
   getProfile() {
     const id = this.getCurrentUserId();
     const token = this.getToken();
@@ -93,7 +86,6 @@ export class AuthService {
     });
   }
 
-  // ✅ Profil (név + email) frissítése
   updateProfile(name: string, email: string) {
     const id = this.getCurrentUserId();
     const token = this.getToken();
@@ -109,7 +101,6 @@ export class AuthService {
     });
   }
 
-  // ✅ Jelszó módosítása régi jelszó ellenőrzéssel
   changePassword(oldPassword: string, newPassword: string, confirmation: string) {
     const id = this.getCurrentUserId();
     const token = this.getToken();
@@ -129,14 +120,12 @@ export class AuthService {
     });
   }
 
-  // ✅ Email megerősítése a backend /verify-email végpontjával
   verifyEmail(token: string) {
     return this.http.get<any>(`${this.apiUrl}/verify-email`, {
       params: { token }
     });
   }
 
-  // ✅ Login válasz elmentése (localStorage)
   setSession(res: LoginResponse) {
     localStorage.setItem('auth', JSON.stringify(res));
     this.loggedInSubject.next(true);
@@ -175,6 +164,18 @@ export class AuthService {
     }
   }
 
+  // ✅ (opcionális) admin ellenőrzés helper
+  isAdmin(): boolean {
+    const auth = localStorage.getItem('auth');
+    if (!auth) return false;
+    try {
+      const data = JSON.parse(auth) as LoginResponse;
+      return data.roleId === 1;
+    } catch {
+      return false;
+    }
+  }
+
   logout() {
     localStorage.removeItem('auth');
     this.loggedInSubject.next(false);
@@ -184,15 +185,6 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!localStorage.getItem('auth');
   }
-
-  // ============================================================
-  // ✅ OPCIONÁLIS: “foglalt-e?” ellenőrzések (csak akkor működik,
-  // ha csinálsz hozzá backend endpointot!)
-  //
-  // Példa backend:
-  // GET /api/check-username?name=Barbara  -> { exists: true/false }
-  // GET /api/check-email?email=a@b.com    -> { exists: true/false }
-  // ============================================================
 
   checkUsernameExists(name: string): Observable<{ exists: boolean }> {
     return this.http.get<{ exists: boolean }>(`${this.apiUrl}/check-username`, {

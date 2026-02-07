@@ -7,10 +7,14 @@ import { ForgotPassword } from './pages/users/forgot-password/forgot-password';
 import { ResetPassword } from './pages/users/reset-password/reset-password';
 import { VerifyEmail } from './pages/users/verify-email/verify-email';
 import { Profile } from './pages/users/profile/profile';
+
 import { Bill } from './pages/modules/bill/bill';
 import { MeterReading } from './pages/modules/meter-reading/meter-reading';
 import { Reminder } from './pages/modules/reminder/reminder';
 import { ShoppingList } from './pages/modules/shopping-list/shopping-list';
+
+import { Admin } from './pages/admin/admin';
+import { adminGuard } from './guards/admin.guard';   // ✅ EZ ÚJ
 
 export const routes: Routes = [
   { path: '', component: Login },
@@ -23,20 +27,22 @@ export const routes: Routes = [
 
   { path: 'reset-password', component: ResetPassword },
 
-  { path: 'verify-email', component: VerifyEmail } ,
-  
+  { path: 'verify-email', component: VerifyEmail },
+
   { path: 'profile', component: Profile },
 
-  { path: 'bill', component: Bill},
+  { path: 'bill', component: Bill },
 
   { path: 'login', component: Login },
 
-  { path: 'meter-reading', component: MeterReading},
+  { path: 'meter-reading', component: MeterReading },
 
   { path: 'reminder', component: Reminder },
 
   { path: 'shopping-list', component: ShoppingList },
 
-  { path: 'search', loadComponent: () => import('./pages/search/search').then(m => m.Search)},
+  { path: 'search', loadComponent: () => import('./pages/search/search').then(m => m.Search) },
 
+  // ✅ ADMIN védett route
+  { path: 'admin', component: Admin, canActivate: [adminGuard] },
 ];

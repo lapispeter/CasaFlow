@@ -15,6 +15,14 @@
 
       <h2 class="login-title">Bejelentkezés</h2>
 
+      <!-- ✅ SYSTEM MESSAGE (Adminból jön) -->
+      @if (systemMessage) {
+        <div class="system-message" style="border:1px solid #ddd; padding:10px; border-radius:6px; margin:12px 0;">
+          <strong>Üzenet</strong>
+          <div>{{ systemMessage }}</div>
+        </div>
+      }
+
       <p class="login-register">
         Nincs még fiókod?
         <a routerLink="/register">Hozz létre egyet itt!</a>

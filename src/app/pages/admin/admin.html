@@ -1,0 +1,96 @@
+<h2>Admin</h2>
+
+<p>
+  <a href="#" (click)="logout()">Kijelentkezés</a>
+</p>
+
+<hr>
+
+<h4>Statisztika</h4>
+<p>Aktív userek: {{ stats.activeCount }}</p>
+<p>Passzív userek: {{ stats.passiveCount }}</p>
+
+<button class="btn btn-secondary" (click)="loadPassiveUsers()">
+  Passzív userek listája
+</button>
+
+<hr>
+
+<h4>System message</h4>
+<textarea class="form-control" rows="4" [(ngModel)]="systemMessageText"></textarea>
+<br>
+<button class="btn btn-primary" (click)="saveSystemMessage()">Mentés</button>
+<span style="margin-left:10px;">{{ systemMessageInfo }}</span>
+
+<hr>
+
+<h4>User keresés</h4>
+
+<form [formGroup]="searchForm" (ngSubmit)="searchUsers()">
+  <input
+    class="form-control"
+    type="text"
+    formControlName="query"
+    placeholder="Név vagy email részlet..."
+  />
+  <br />
+  <button class="btn btn-primary" type="submit">Keresés</button>
+</form>
+
+<p style="color:red;">{{ infoMessage }}</p>
+
+@if (lastDeleteResult) {
+  <div style="border:1px solid #ddd; padding:12px; margin:12px 0; border-radius:6px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <strong>Törlés eredménye</strong>
+      <button class="btn btn-sm btn-outline-secondary" (click)="clearDeleteResult()">X</button>
+    </div>
+
+    <p>{{ lastDeleteResult.message }}</p>
+
+    <ul>
+      <li>
+        @if (lastDeleteResult.checks.userDeleted) { ✅ } @else { ❌ }
+        User törölve
+      </li>
+      <li>✅ Bills törölve: {{ lastDeleteResult.checks.billsDeleted ?? 0 }}</li>
+      <li>✅ Meter readings törölve: {{ lastDeleteResult.checks.meterReadingsDeleted ?? 0 }}</li>
+      <li>✅ Reminders törölve: {{ lastDeleteResult.checks.remindersDeleted ?? 0 }}</li>
+      <li>✅ Shopping list tételek törölve: {{ lastDeleteResult.checks.shoppingListDeleted ?? 0 }}</li>
+    </ul>
+  </div>
+}
+
+@if (users.length > 0) {
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Név</th>
+        <th>Email</th>
+        <th>roleId</th>
+        <th>verified</th>
+        <th>lastActivityAt</th>
+        <th>Művelet</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (u of users; track u.id) {
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.roleId }}</td>
+          <td>{{ u.isVerified }}</td>
+          <td>{{ u.lastActivityAt }}</td>
+          <td>
+            <button class="btn btn-danger btn-sm" (click)="deleteUser(u)">
+              Törlés
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
