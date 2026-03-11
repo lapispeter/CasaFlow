@@ -32,14 +32,14 @@
 
   <!-- NAVIGÁCIÓS CSEMPEK -->
   <section class="modules">
-    <a routerLink="/bill" class="module-card">Számlák</a>
-    <a routerLink="/reminder" class="module-card">Emlékeztetők</a>
-    <a routerLink="/shopping-list" class="module-card">Bevásárló lista</a>
-    <a routerLink="/meter-reading" class="module-card">Mérőórák</a>
+    <a (click)="goBillsLastMonth()" class="module-card">Számlák</a>
+    <a (click)="goRemindersLastMonth()" class="module-card">Emlékeztetők</a>
+    <a (click)="goShoppingLastMonth()" class="module-card">Bevásárló lista</a>
+    <a (click)="goMeterReadingsLastMonth()" class="module-card">Mérőórák</a>
   </section>
 
 </div>
 
 <p class="logout">
   <a (click)="logout()">kijelentkezés</a>
- </p>
+</p>

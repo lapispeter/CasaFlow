@@ -30,7 +30,7 @@
   @if(showList){
     <div class="cf-card">
       <div class="cf-table">
-        <table class="table table-striped mb-0">
+        <table class="table table-striped mb-0 cf-mobile-cards">
           <thead>
             <tr>
               <th>Típus</th>
@@ -43,10 +43,10 @@
           <tbody>
             @for(r of readings; track r.id) {
               <tr>
-                <td>{{ r.meterType }}</td>
-                <td>{{ r.reading }}</td>
-                <td>{{ r.date | date:'yyyy. MM. dd.' }}</td>
-                <td class="text-end">
+                <td data-label="Típus">{{ r.meterType }}</td>
+                <td data-label="Leolvasás">{{ r.reading }}</td>
+                <td data-label="Dátum">{{ r.date | date:'yyyy. MM. dd.' }}</td>
+                <td data-label="Műveletek" class="text-end cf-actions-cell">
                   <button class="btn btn-sm btn-warning me-2" (click)="startEdit(r)">Módosítás</button>
                   <button class="btn btn-sm btn-danger" (click)="startDelete(r)">Törlés</button>
                 </td>

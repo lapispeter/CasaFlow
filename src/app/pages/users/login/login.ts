@@ -19,6 +19,9 @@ export class Login implements OnInit {
   // ✅ System message
   systemMessage: string = '';
 
+  // ✅ login hibaüzenet
+  errorMessage: string = '';
+
   constructor(
     private authService: AuthService,
     private router: Router,
@@ -36,17 +39,16 @@ export class Login implements OnInit {
   }
 
   onLogin() {
+    this.errorMessage = '';
+
     this.authService.login(this.username, this.password).subscribe({
       next: (res) => {
-        // ✅ session mentés (token)
         this.authService.setSession(res);
 
-        // ✅ role lekérés a profilból, és aszerint navigálás
         this.authService.getProfile().subscribe({
           next: (profileRes: any) => {
             const user = profileRes?.data ?? profileRes;
 
-            // roleId: 1 = admin (nálatok így)
             if (user?.roleId === 1) {
               this.router.navigate(['/admin']);
             } else {
@@ -55,13 +57,18 @@ export class Login implements OnInit {
           },
           error: (err) => {
             console.log('Profile load error:', err);
-            // ha valamiért nem jön profile, legalább menjen home-ra
             this.router.navigate(['/home']);
           }
         });
       },
       error: (err) => {
         console.error('Hiba a bejelentkezésnél 😥', err);
+
+        if (err.status === 401 || err.status === 400) {
+          this.errorMessage = 'Hibás felhasználónév vagy jelszó.';
+        } else {
+          this.errorMessage = 'A bejelentkezés nem sikerült. Próbáld újra később.';
+        }
       }
     });
   }

@@ -39,7 +39,7 @@
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  overflow: hidden; /* csak a kártya sarkai miatt */
+  overflow: hidden;
 }
 
 .cf-table{
@@ -72,11 +72,11 @@
 }
 
 .cf-status.is-paid{
-  background: rgba(25, 135, 84, 0.15); /* bootstrap success */
+  background: rgba(25, 135, 84, 0.15);
 }
 
 .cf-status.is-unpaid{
-  background: rgba(220, 53, 69, 0.15); /* bootstrap danger */
+  background: rgba(220, 53, 69, 0.15);
 }
 
 /* ====== FOOTER LINK ====== */
@@ -96,26 +96,98 @@
 
 /* ====== RESPONSIVE ====== */
 @media (max-width: 768px){
+  .cf-page{
+    padding: 18px 12px;
+  }
+
   .cf-header{
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .cf-title{
+    font-size: 1.4rem;
   }
 
   .cf-actions{
     width: 100%;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .cf-actions .btn{
     width: 100%;
+    margin-right: 0 !important;
   }
 
-  /* táblázat mobilon görgethető legyen */
+  .cf-card{
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
   .cf-table{
-    overflow-x: auto;
-  }
-  .cf-table table{
-    min-width: 720px;
+    overflow: visible;
   }
 
-  
+  .cf-mobile-cards thead{
+    display: none;
+  }
+
+  .cf-mobile-cards,
+  .cf-mobile-cards tbody,
+  .cf-mobile-cards tr,
+  .cf-mobile-cards td{
+    display: block;
+    width: 100%;
+  }
+
+  .cf-mobile-cards tr{
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    padding: 8px 0;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  }
+
+  .cf-mobile-cards td{
+    border: 0 !important;
+    border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+    padding: 10px 14px;
+    text-align: left !important;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .cf-mobile-cards td:last-child{
+    border-bottom: 0 !important;
+  }
+
+  .cf-mobile-cards td::before{
+    content: attr(data-label);
+    display: block;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #2d6f63;
+    margin-bottom: 4px;
+  }
+
+  .cf-mobile-cards .cf-actions-cell{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start !important;
+    align-items: center;
+  }
+
+  .cf-mobile-cards .cf-actions-cell::before{
+    width: 100%;
+  }
+
+  .cf-mobile-cards .cf-actions-cell .btn{
+    margin-right: 0 !important;
+  }
 }

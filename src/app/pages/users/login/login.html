@@ -23,6 +23,13 @@
         </div>
       }
 
+      <!-- ❗ LOGIN ERROR MESSAGE -->
+      @if (errorMessage) {
+        <div class="login-error">
+          {{ errorMessage }}
+        </div>
+      }
+
       <p class="login-register">
         Nincs még fiókod?
         <a routerLink="/register">Hozz létre egyet itt!</a>

@@ -8,7 +8,6 @@
     </div>
   </div>
 
-  <!-- ✅ Siker / hiba visszajelzés (új) -->
   @if(successMessage){
     <div class="alert alert-success cf-alert">
       {{ successMessage }}
@@ -21,18 +20,21 @@
     </div>
   }
 
-  <!-- Üzenet, ha nincs találat -->
   @if(noResultsMessage){
     <div class="alert alert-warning cf-alert">
       {{ noResultsMessage }}
     </div>
   }
 
-  <!-- Lista csak akkor jelenjen meg, ha már lekérdezte -->
+<p class="cf-info">
+  Az alábbi listában az elmúlt 1 hónap adatait látod.
+  Bővebb szűrést a <strong>Számláim</strong> gombra kattintva állíthatsz be.
+</p>
+
   @if(showList){
     <div class="cf-card">
       <div class="cf-table">
-        <table class="table table-striped mb-0">
+        <table class="table table-striped mb-0 cf-mobile-cards">
           <thead>
             <tr>
               <th>Számlatípus</th>
@@ -46,10 +48,10 @@
           <tbody>
             @for(bill of bills; track bill.id) {
               <tr>
-                <td>{{ bill.billType }}</td>
-                <td>{{ bill.amount }}</td>
-                <td>{{ bill.date | date:'yyyy. MM. dd.' }}</td>
-                <td>
+                <td data-label="Számlatípus">{{ bill.billType }}</td>
+                <td data-label="Fizetendő összeg">{{ bill.amount }}</td>
+                <td data-label="Határidő">{{ bill.date | date:'yyyy. MM. dd.' }}</td>
+                <td data-label="Fizetve">
                   <span
                     class="cf-status"
                     [class.is-paid]="bill.paymentStatus === 'Igen'"
@@ -58,7 +60,7 @@
                     {{ bill.paymentStatus }}
                   </span>
                 </td>
-                <td class="text-end">
+                <td data-label="Műveletek" class="text-end cf-actions-cell">
                   <button class="btn btn-sm btn-warning me-2" (click)="startEdit(bill)">Módosítás</button>
                   <button class="btn btn-sm btn-danger" (click)="startDelete(bill)">Törlés</button>
                 </td>

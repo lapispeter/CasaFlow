@@ -1,96 +1,169 @@
-<h2>Admin</h2>
+<div class="cf-page cf-admin">
 
-<p>
-  <a href="#" (click)="logout()">Kijelentkezés</a>
-</p>
+  <div class="cf-header">
+    <h1 class="cf-title">Admin</h1>
 
-<hr>
+    <div class="cf-actions">
+      <button class="btn btn-outline-secondary" (click)="logout()">
+        Kijelentkezés
+      </button>
+    </div>
+  </div>
 
-<h4>Statisztika</h4>
-<p>Aktív userek: {{ stats.activeCount }}</p>
-<p>Passzív userek: {{ stats.passiveCount }}</p>
+  <!-- STATISZTIKA -->
+  <div class="cf-card">
+    <h4>Statisztika</h4>
 
-<button class="btn btn-secondary" (click)="loadPassiveUsers()">
-  Passzív userek listája
-</button>
+    <div class="admin-stats">
+      <div class="stat-box">
+        <div class="stat-label">Aktív userek</div>
+        <div class="stat-value">{{ stats.activeCount }}</div>
+      </div>
 
-<hr>
-
-<h4>System message</h4>
-<textarea class="form-control" rows="4" [(ngModel)]="systemMessageText"></textarea>
-<br>
-<button class="btn btn-primary" (click)="saveSystemMessage()">Mentés</button>
-<span style="margin-left:10px;">{{ systemMessageInfo }}</span>
-
-<hr>
-
-<h4>User keresés</h4>
-
-<form [formGroup]="searchForm" (ngSubmit)="searchUsers()">
-  <input
-    class="form-control"
-    type="text"
-    formControlName="query"
-    placeholder="Név vagy email részlet..."
-  />
-  <br />
-  <button class="btn btn-primary" type="submit">Keresés</button>
-</form>
-
-<p style="color:red;">{{ infoMessage }}</p>
-
-@if (lastDeleteResult) {
-  <div style="border:1px solid #ddd; padding:12px; margin:12px 0; border-radius:6px;">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <strong>Törlés eredménye</strong>
-      <button class="btn btn-sm btn-outline-secondary" (click)="clearDeleteResult()">X</button>
+      <div class="stat-box">
+        <div class="stat-label">Passzív userek</div>
+        <div class="stat-value">{{ stats.passiveCount }}</div>
+      </div>
     </div>
 
-    <p>{{ lastDeleteResult.message }}</p>
-
-    <ul>
-      <li>
-        @if (lastDeleteResult.checks.userDeleted) { ✅ } @else { ❌ }
-        User törölve
-      </li>
-      <li>✅ Bills törölve: {{ lastDeleteResult.checks.billsDeleted ?? 0 }}</li>
-      <li>✅ Meter readings törölve: {{ lastDeleteResult.checks.meterReadingsDeleted ?? 0 }}</li>
-      <li>✅ Reminders törölve: {{ lastDeleteResult.checks.remindersDeleted ?? 0 }}</li>
-      <li>✅ Shopping list tételek törölve: {{ lastDeleteResult.checks.shoppingListDeleted ?? 0 }}</li>
-    </ul>
+    <button class="btn btn-secondary" (click)="loadPassiveUsers()">
+      Passzív userek listája
+    </button>
   </div>
-}
 
-@if (users.length > 0) {
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Név</th>
-        <th>Email</th>
-        <th>roleId</th>
-        <th>verified</th>
-        <th>lastActivityAt</th>
-        <th>Művelet</th>
-      </tr>
-    </thead>
+  <!-- SYSTEM MESSAGE -->
+  <div class="cf-card">
+    <h4>System message</h4>
 
-    <tbody>
-      @for (u of users; track u.id) {
-        <tr>
-          <td>{{ u.id }}</td>
-          <td>{{ u.name }}</td>
-          <td>{{ u.email }}</td>
-          <td>{{ u.roleId }}</td>
-          <td>{{ u.isVerified }}</td>
-          <td>{{ u.lastActivityAt }}</td>
-          <td>
-            <button class="btn btn-danger btn-sm" (click)="deleteUser(u)">
-              Törlés
-            </button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
+    <textarea
+      class="form-control"
+      rows="4"
+      [(ngModel)]="systemMessageText"
+    ></textarea>
+
+    <div class="cf-actions admin-actions">
+      <button class="btn btn-primary" (click)="saveSystemMessage()">
+        Mentés
+      </button>
+
+      <span class="admin-info">
+        {{ systemMessageInfo }}
+      </span>
+    </div>
+  </div>
+
+  <!-- USER KERESÉS -->
+  <div class="cf-card">
+    <h4>User keresés</h4>
+
+    <form [formGroup]="searchForm" (ngSubmit)="searchUsers()" class="admin-search">
+
+      <input
+        class="form-control"
+        type="text"
+        formControlName="query"
+        placeholder="Név vagy email részlet..."
+      />
+
+      <div class="cf-actions">
+        <button class="btn btn-primary" type="submit">
+          Keresés
+        </button>
+      </div>
+
+    </form>
+
+    <p class="admin-error">{{ infoMessage }}</p>
+
+  </div>
+
+  <!-- DELETE RESULT -->
+  @if (lastDeleteResult) {
+    <div class="cf-card admin-result">
+
+      <div class="admin-result-header">
+        <strong>Törlés eredménye</strong>
+
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          (click)="clearDeleteResult()"
+        >
+          X
+        </button>
+      </div>
+
+      <p>{{ lastDeleteResult.message }}</p>
+
+      <ul>
+        <li>
+          @if (lastDeleteResult.checks.userDeleted) { ✅ } @else { ❌ }
+          User törölve
+        </li>
+
+        <li>✅ Bills törölve: {{ lastDeleteResult.checks.billsDeleted ?? 0 }}</li>
+        <li>✅ Meter readings törölve: {{ lastDeleteResult.checks.meterReadingsDeleted ?? 0 }}</li>
+        <li>✅ Reminders törölve: {{ lastDeleteResult.checks.remindersDeleted ?? 0 }}</li>
+        <li>✅ Shopping list törölve: {{ lastDeleteResult.checks.shoppingListDeleted ?? 0 }}</li>
+      </ul>
+
+    </div>
+  }
+
+  <!-- USER LIST -->
+  @if (users.length > 0) {
+
+    <div class="cf-card">
+
+      <div class="cf-table">
+
+        <table class="table table-striped cf-mobile-cards">
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Név</th>
+              <th>Email</th>
+              <th>roleId</th>
+              <th>verified</th>
+              <th>lastActivityAt</th>
+              <th>Művelet</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (u of users; track u.id) {
+
+              <tr>
+
+                <td data-label="ID">{{ u.id }}</td>
+                <td data-label="Név">{{ u.name }}</td>
+                <td data-label="Email">{{ u.email }}</td>
+                <td data-label="Role">{{ u.roleId }}</td>
+                <td data-label="Verified">{{ u.isVerified }}</td>
+                <td data-label="Last activity">{{ u.lastActivityAt }}</td>
+
+                <td data-label="Művelet">
+                  <button
+                    class="btn btn-danger btn-sm"
+                    (click)="deleteUser(u)"
+                  >
+                    Törlés
+                  </button>
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

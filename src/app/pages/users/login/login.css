@@ -175,3 +175,15 @@
 .login-title {
   font-family: var(--font-heading);
 }
+
+/* LOGIN ERROR MESSAGE */
+.login-error{
+  margin: 12px 0 18px 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(220, 53, 69, 0.10);
+  border: 1px solid rgba(220, 53, 69, 0.25);
+  color: #b02a37;
+  font-size: 14px;
+  text-align: center;
+}

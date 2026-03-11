@@ -11,6 +11,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
   styleUrl: './bill.css',
 })
 export class Bill {
+
   bills: any[] = [];
 
   billForm: any;
@@ -29,7 +30,7 @@ export class Bill {
   errorMessage = '';
   isSaving = false;
 
-  // ✅ Globális keresőből jövő paramok
+  // globális kereső
   focusId: number | null = null;
   searchQ = '';
 
@@ -40,17 +41,20 @@ export class Bill {
   ) {}
 
   ngOnInit() {
+
     this.initForms();
 
     this.route.queryParams.subscribe((params: any) => {
+
       const q = String(params?.q ?? '').trim();
       const focusIdRaw = params?.focusId;
 
       this.searchQ = q;
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
 
-      // ✅ Ha keresőből jövünk, ez legyen az első
+      // ===== GLOBÁLIS KERESŐ =====
       if (q) {
+
         this.filterForm.patchValue({
           billTypeMode: 'all',
           billTypeText: '',
@@ -62,23 +66,29 @@ export class Bill {
         return;
       }
 
-      // ✅ Ha Home-ról jövünk, fizetendők
+      // ===== HOME NAVIGÁCIÓ =====
       if (params?.fromHome) {
-        this.searchQ = '';
+
+        const billTypeMode = String(params?.billTypeMode ?? 'all');
+        const billTypeText = String(params?.billTypeText ?? '');
+        const periodMonths = String(params?.periodMonths ?? '1');
+        const paymentMode = String(params?.paymentMode ?? 'all');
 
         this.filterForm.patchValue({
-          billTypeMode: 'all',
-          billTypeText: '',
-          periodMonths: 'all',
-          paymentMode: 'Nem'
+          billTypeMode,
+          billTypeText,
+          periodMonths,
+          paymentMode
         });
 
         this.applyFilters();
       }
+
     });
   }
 
   initForms() {
+
     this.billForm = this.builder.group({
       billType: [''],
       amount: [''],
@@ -87,14 +97,16 @@ export class Bill {
     });
 
     this.filterForm = this.builder.group({
-      billTypeMode: ['all'],     // all | custom
+      billTypeMode: ['all'],
       billTypeText: [''],
-      periodMonths: ['1'],       // '1' | '3' | '6' | '12' | 'all'
+      periodMonths: ['1'],
       paymentMode: ['all']
     });
+
   }
 
-  // ------- FILTER MODAL -------
+  // ===== FILTER MODAL =====
+
   openFilterModal() {
     this.noResultsMessage = '';
     this.showFilterModal = true;
@@ -105,22 +117,16 @@ export class Bill {
   }
 
   applyFilters() {
+
     const f = this.filterForm.value;
 
-    // ha a modalban custom szöveget ír be
     const typedText =
       f.billTypeMode === 'custom'
         ? String(f.billTypeText ?? '').trim()
         : '';
 
-    // amit ténylegesen keresünk:
-    // - ha a globális keresőből jött q, akkor az a nyerő
-    // - különben a kézzel beírt custom szöveg
     const localNeedle = this.searchQ || typedText;
 
-    // ✅ HA VAN keresőkifejezés:
-    // 1) backendből "all" lekérés (hogy ne bukjunk el a case/ékezet miatt)
-    // 2) frontend szűrés normalize + contains
     const apiBillTypeMode = localNeedle ? 'all' : f.billTypeMode;
     const apiBillTypeText = localNeedle ? '' : typedText;
 
@@ -130,21 +136,30 @@ export class Bill {
       periodMonths: String(f.periodMonths),
       paymentMode: String(f.paymentMode)
     }).subscribe({
+
       next: (res: any) => {
+
         const list = res.data ?? res;
         const all = Array.isArray(list) ? list : [];
 
         let filtered = all;
 
         if (localNeedle) {
-          const parts = this.normalizeText(localNeedle).split(/\s+/).filter(Boolean);
+
+          const parts = this.normalizeText(localNeedle)
+            .split(/\s+/)
+            .filter(Boolean);
 
           filtered = all.filter((b: any) => {
+
             const hay = this.normalizeText(
               `${b?.billType ?? ''} ${b?.amount ?? ''} ${b?.paymentStatus ?? ''}`
             );
+
             return parts.every(p => hay.includes(p));
+
           });
+
         }
 
         this.bills = filtered;
@@ -153,23 +168,38 @@ export class Bill {
         this.closeFilterModal();
 
         if (this.bills.length === 0) {
+
           this.noResultsMessage = localNeedle
             ? `Nincs találat erre: "${localNeedle}".`
             : 'Nincs találat a megadott szűrésre.';
+
         } else {
+
           this.noResultsMessage = '';
+
         }
+
       },
+
       error: (err) => {
+
         console.log(err);
+
         this.closeFilterModal();
-        this.noResultsMessage = 'Hiba történt a lekérdezésnél.';
+
+        this.noResultsMessage =
+          'Hiba történt a lekérdezésnél.';
+
       }
+
     });
+
   }
 
-  // ------- CRUD MODAL -------
+  // ===== CRUD MODAL =====
+
   startShowModal() {
+
     this.addMode = true;
     this.selectedBill = null;
 
@@ -181,9 +211,11 @@ export class Bill {
     });
 
     this.showModal = true;
+
   }
 
   startEdit(bill: any) {
+
     this.addMode = false;
     this.selectedBill = bill;
 
@@ -195,6 +227,7 @@ export class Bill {
     });
 
     this.showModal = true;
+
   }
 
   cancel() {
@@ -202,16 +235,22 @@ export class Bill {
   }
 
   startSave() {
+
     if (this.isSaving) return;
 
     this.showModal = false;
 
-    if (this.addMode) this.startAddBill();
-    else this.startUpdateBill();
+    if (this.addMode)
+      this.startAddBill();
+    else
+      this.startUpdateBill();
+
   }
 
   startAddBill() {
+
     if (this.isSaving) return;
+
     this.isSaving = true;
 
     const newBill = {
@@ -222,22 +261,37 @@ export class Bill {
     };
 
     this.api.createBill(newBill).subscribe({
+
       next: () => {
+
         this.showSuccess('Sikeres rögzítés ✅');
-        if (this.showList) this.applyFilters();
+
+        if (this.showList)
+          this.applyFilters();
+
         this.isSaving = false;
+
       },
+
       error: (err) => {
+
         console.log(err);
+
         this.showError('Hiba történt a mentésnél.');
+
         this.isSaving = false;
-      },
+
+      }
+
     });
+
   }
 
   startUpdateBill() {
+
     if (!this.selectedBill?.id) return;
     if (this.isSaving) return;
+
     this.isSaving = true;
 
     const updatedBill = {
@@ -248,62 +302,113 @@ export class Bill {
     };
 
     this.api.updateBill(this.selectedBill.id, updatedBill).subscribe({
+
       next: () => {
+
         this.showSuccess('Sikeres módosítás ✅');
-        if (this.showList) this.applyFilters();
+
+        if (this.showList)
+          this.applyFilters();
+
         this.isSaving = false;
+
       },
+
       error: (err) => {
+
         console.log(err);
+
         this.showError('Hiba történt a módosításnál.');
+
         this.isSaving = false;
-      },
+
+      }
+
     });
+
   }
 
   startDelete(bill: any) {
-    const ok = confirm(`Biztos törlöd ezt a számlát? (${bill.billType})`);
+
+    const ok =
+      confirm(`Biztos törlöd ezt a számlát? (${bill.billType})`);
+
     if (!ok) return;
 
     this.api.deleteBill(bill.id).subscribe({
+
       next: () => {
+
         this.showSuccess('Sikeres törlés ✅');
-        if (this.showList) this.applyFilters();
+
+        if (this.showList)
+          this.applyFilters();
+
       },
+
       error: (err) => {
+
         console.log(err);
+
         this.showError('Hiba történt a törlésnél.');
-      },
+
+      }
+
     });
+
   }
 
   private showSuccess(msg: string) {
+
     this.successMessage = msg;
     this.errorMessage = '';
-    setTimeout(() => (this.successMessage = ''), 2500);
+
+    setTimeout(() =>
+      this.successMessage = '',
+      2500
+    );
+
   }
 
   private showError(msg: string) {
+
     this.errorMessage = msg;
     this.successMessage = '';
-    setTimeout(() => (this.errorMessage = ''), 4000);
+
+    setTimeout(() =>
+      this.errorMessage = '',
+      4000
+    );
+
   }
 
   private toDateInputValue(dateValue: any): string {
+
     if (!dateValue) return '';
+
     const d = new Date(dateValue);
-    if (isNaN(d.getTime())) return '';
+
+    if (isNaN(d.getTime()))
+      return '';
+
     const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1)
+      .padStart(2, '0');
+    const dd = String(d.getDate())
+      .padStart(2, '0');
+
     return `${yyyy}-${mm}-${dd}`;
+
   }
 
   private normalizeText(s: string): string {
+
     return String(s ?? '')
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .trim();
+
   }
+
 }

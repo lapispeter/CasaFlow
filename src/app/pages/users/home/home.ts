@@ -30,21 +30,22 @@ export class Home implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // EREDETI LOGIKA: maradjon meg
+
+    // felhasználó neve
     this.name = this.authService.getCurrentUserName();
 
-    // ÚJ: számlálók betöltése
+    // számlálók betöltése
     this.loadCounts();
   }
 
-  // EREDETI LOGIKA: maradjon meg
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
 
   loadCounts() {
-    // 1) Fizetetlen számlák (paymentMode=Nem, minden idő, összes típus)
+
+    // 1️⃣ Fizetetlen számlák
     this.billService.getBillsFiltered({
       billTypeMode: 'all',
       billTypeText: '',
@@ -60,7 +61,7 @@ export class Home implements OnInit {
       }
     });
 
-    // 2) Mai emlékeztetők – összes lekérése és frontend szűrés "mára"
+    // 2️⃣ Mai emlékeztetők
     this.reminderService.getFiltered({
       titleMode: 'all',
       titleText: '',
@@ -84,7 +85,7 @@ export class Home implements OnInit {
       }
     });
 
-    // 3) Bevásárló lista – nincs megvéve tételek
+    // 3️⃣ Bevásárló lista – nincs megvéve
     this.shoppingService.getFiltered({
       titleMode: 'all',
       titleText: '',
@@ -102,7 +103,11 @@ export class Home implements OnInit {
     });
   }
 
-  // --- Navigációk: Home -> előszűrt listák ---
+
+  // =============================
+  // FELSŐ CSEMPEK (maradnak)
+  // =============================
+
   goUnpaidBills() {
     this.router.navigate(['/bill'], {
       queryParams: {
@@ -133,4 +138,58 @@ export class Home implements OnInit {
       }
     });
   }
+
+
+  // =============================
+  // ALSÓ MODUL CSEMPEK
+  // (1 hónap automatikus lista)
+  // =============================
+
+  goBillsLastMonth() {
+    this.router.navigate(['/bill'], {
+      queryParams: {
+        billTypeMode: 'all',
+        billTypeText: '',
+        periodMonths: '1',
+        paymentMode: 'all',
+        fromHome: 1
+      }
+    });
+  }
+
+  goRemindersLastMonth() {
+    this.router.navigate(['/reminder'], {
+      queryParams: {
+        titleMode: 'all',
+        titleText: '',
+        periodMonths: '1',
+        fromHome: 1
+      }
+    });
+  }
+
+  goShoppingLastMonth() {
+    this.router.navigate(['/shopping-list'], {
+      queryParams: {
+        titleMode: 'all',
+        titleText: '',
+        periodMonths: '1',
+        boughtMode: 'all',
+        expiryMode: 'all',
+        fromHome: 1
+      }
+    });
+  }
+
+  goMeterReadingsLastMonth() {
+    this.router.navigate(['/meter-reading'], {
+      queryParams: {
+        meterTypeMode: 'all',
+        meterTypeText: '',
+        periodMonths: '1',
+        fromHome: 1
+      }
+    });
+  }
+
 }
