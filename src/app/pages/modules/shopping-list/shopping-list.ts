@@ -30,10 +30,10 @@ export class ShoppingList {
 
   noResultsMessage = '';
 
-  // ✅ globális keresőből érkező "kiemelendő" találat
+  // globális keresőből érkező "kiemelendő" találat
   focusId: number | null = null;
 
-  // ✅ globális keresőből érkező q (külön tároljuk, mert NEM a backend "custom" szűrését használjuk)
+  // globális keresőből érkező q
   searchQ = '';
 
   constructor(
@@ -52,8 +52,7 @@ export class ShoppingList {
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
       this.searchQ = q;
 
-      // ✅ Ha keresőből jövünk:
-      // Nem "custom"-ot használunk, hanem "all"-t, és mi szűrünk a frontendben.
+      // ===== GLOBÁLIS KERESŐ =====
       if (q) {
         this.filterForm.patchValue({
           titleMode: 'all',
@@ -67,15 +66,22 @@ export class ShoppingList {
         return;
       }
 
-      // ✅ Ha Home-ról jövünk
+      // ===== HOME NAVIGÁCIÓ =====
       if (params?.fromHome) {
+        const titleMode = String(params?.titleMode ?? 'all');
+        const titleText = String(params?.titleText ?? '');
+        const periodMonths = String(params?.periodMonths ?? '1');
+        const boughtMode = String(params?.boughtMode ?? 'all');
+        const expiryMode = String(params?.expiryMode ?? 'all');
+
         this.searchQ = '';
+
         this.filterForm.patchValue({
-          titleMode: 'all',
-          titleText: '',
-          periodMonths: 'all',
-          boughtMode: 'false',
-          expiryMode: 'all'
+          titleMode,
+          titleText,
+          periodMonths,
+          boughtMode,
+          expiryMode
         });
 
         this.applyFilters();
@@ -116,7 +122,6 @@ export class ShoppingList {
   applyFilters() {
     const f = this.filterForm.value;
 
-    // innen kezdve: backend "all", plusz a saját keresés (ha van searchQ)
     this.api.getFiltered({
       titleMode: String(f.titleMode),
       titleText: String(f.titleText ?? ''),
@@ -128,12 +133,14 @@ export class ShoppingList {
         const list = res.data ?? res;
         const allItems = Array.isArray(list) ? list : [];
 
-        // ✅ frontend keresés: kis/nagybetű, ékezet, contains
+        // frontend keresés globális q esetén
         if (this.searchQ) {
           const needleParts = this.normalizeText(this.searchQ).split(/\s+/).filter(Boolean);
 
           this.items = allItems.filter((x: any) => {
-            const hay = this.normalizeText(`${x?.title ?? ''} ${x?.note ?? ''} ${x?.unit ?? ''} ${x?.quantity ?? ''}`);
+            const hay = this.normalizeText(
+              `${x?.title ?? ''} ${x?.note ?? ''} ${x?.unit ?? ''} ${x?.quantity ?? ''}`
+            );
             return needleParts.every(p => hay.includes(p));
           });
 
@@ -149,7 +156,6 @@ export class ShoppingList {
           return;
         }
 
-        // ✅ ha nincs globális q, akkor simán a backend szűrés eredménye
         this.items = allItems;
 
         this.showList = true;

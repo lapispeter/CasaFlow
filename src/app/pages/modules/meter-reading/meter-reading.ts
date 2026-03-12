@@ -29,7 +29,7 @@ export class MeterReading {
   errorMessage = '';
   isSaving = false;
 
-  // ✅ Globális keresőből jövő paramok
+  // globális keresőből jövő paramok
   focusId: number | null = null;
   searchQ = '';
 
@@ -49,11 +49,28 @@ export class MeterReading {
       this.searchQ = q;
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
 
+      // ===== GLOBÁLIS KERESŐ =====
       if (q) {
         this.filterForm.patchValue({
           meterTypeMode: 'all',
           meterTypeText: '',
           periodMonths: 'all'
+        });
+
+        this.applyFilters();
+        return;
+      }
+
+      // ===== HOME NAVIGÁCIÓ =====
+      if (params?.fromHome) {
+        const meterTypeMode = String(params?.meterTypeMode ?? 'all');
+        const meterTypeText = String(params?.meterTypeText ?? '');
+        const periodMonths = String(params?.periodMonths ?? '1');
+
+        this.filterForm.patchValue({
+          meterTypeMode,
+          meterTypeText,
+          periodMonths
         });
 
         this.applyFilters();
@@ -71,7 +88,7 @@ export class MeterReading {
     this.filterForm = this.builder.group({
       meterTypeMode: ['all'],
       meterTypeText: [''],
-      periodMonths: ['1'] // '1'|'3'|'6'|'12'|'all'
+      periodMonths: ['1']
     });
   }
 

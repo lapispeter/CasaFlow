@@ -31,7 +31,7 @@ export class Reminder {
 
   private isTodayMode = false;
 
-  // ✅ Globális keresőből jövő paramok
+  // globális keresőből jövő paramok
   focusId: number | null = null;
   searchQ = '';
 
@@ -51,7 +51,7 @@ export class Reminder {
       this.searchQ = q;
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
 
-      // ✅ Ha keresőből jövünk: ez legyen az első
+      // ===== GLOBÁLIS KERESŐ =====
       if (q) {
         this.isTodayMode = false;
 
@@ -65,10 +65,29 @@ export class Reminder {
         return;
       }
 
-      // ✅ Home-ról: "ma"
+      // ===== HOME NAVIGÁCIÓ =====
       if (params?.fromHome) {
-        this.isTodayMode = true;
-        this.loadTodayReminders();
+        const titleMode = String(params?.titleMode ?? 'all');
+        const titleText = String(params?.titleText ?? '');
+        const periodMonths = String(params?.periodMonths ?? '1');
+
+        // felső csempe: ma
+        if (!params?.titleMode && !params?.titleText && !params?.periodMonths) {
+          this.isTodayMode = true;
+          this.loadTodayReminders();
+          return;
+        }
+
+        // alsó modulcsempe: elmúlt 1 hónap
+        this.isTodayMode = false;
+
+        this.filterForm.patchValue({
+          titleMode,
+          titleText,
+          periodMonths
+        });
+
+        this.applyFilters();
       }
     });
   }
@@ -81,9 +100,9 @@ export class Reminder {
     });
 
     this.filterForm = this.builder.group({
-      titleMode: ['all'], // all | custom
+      titleMode: ['all'],
       titleText: [''],
-      periodMonths: ['1'] // '1'|'3'|'6'|'12'|'all'
+      periodMonths: ['1']
     });
   }
 
