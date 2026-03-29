@@ -27,11 +27,10 @@
     </div>
   }
 
-<p class="cf-info">
-  Az alábbi listában az elmúlt 1 hónap adatait látod.
-  Bővebb szűrést a <strong>Bevásárló listám</strong> gombra kattintva állíthatsz be.
-</p>
-
+  <p class="cf-info">
+    Az alábbi listában az elmúlt 1 hónap adatait látod.
+    Bővebb szűrést a <strong>Bevásárló listám</strong> gombra kattintva állíthatsz be.
+  </p>
 
   @if(showList){
     <div class="cf-card">
@@ -51,7 +50,7 @@
 
           <tbody>
             @for(i of items; track i.id) {
-              <tr>
+              <tr [class.cf-row-done]="i.isBought">
                 <td data-label="Cím">{{ i.title }}</td>
                 <td data-label="Megjegyzés">{{ i.note }}</td>
                 <td data-label="Mennyiség">{{ i.quantity }} {{ i.unit }}</td>
@@ -64,6 +63,18 @@
                 </td>
 
                 <td data-label="Műveletek" class="text-end cf-actions-cell">
+                  @if(!i.isBought){
+                    <button
+                      class="btn btn-sm cf-done-btn me-2"
+                      (click)="markAsBought(i)"
+                      [disabled]="isSaving"
+                    >
+                      ✓
+                    </button>
+                  } @else {
+                    <span class="cf-done-badge me-2">✓ Kész</span>
+                  }
+
                   <button class="btn btn-sm btn-warning me-2" (click)="startEdit(i)">Módosítás</button>
                   <button class="btn btn-sm btn-danger" (click)="startDelete(i)">Törlés</button>
                 </td>

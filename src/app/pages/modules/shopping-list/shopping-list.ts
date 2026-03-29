@@ -264,6 +264,36 @@ export class ShoppingList {
     });
   }
 
+  markAsBought(i: any) {
+    if (!i?.id) return;
+    if (this.isSaving) return;
+
+    this.isSaving = true;
+
+    const payload = {
+      title: i.title,
+      note: i.note ?? '',
+      quantity: i.quantity ?? 1,
+      unit: i.unit ?? 'db',
+      purchaseDate: this.toDateInputValue(i.purchaseDate) || null,
+      expiryDate: this.toDateInputValue(i.expiryDate) || null,
+      isBought: true
+    };
+
+    this.api.update(i.id, payload).subscribe({
+      next: () => {
+        this.showSuccess('A tétel teljesítettként lett jelölve ✅');
+        if (this.showList) this.applyFilters();
+        this.isSaving = false;
+      },
+      error: (err) => {
+        console.log(err);
+        this.showError('Hiba történt a frissítésnél.');
+        this.isSaving = false;
+      }
+    });
+  }
+
   startDelete(i: any) {
     const ok = confirm(`Biztos törlöd ezt a tételt? (${i.title})`);
     if (!ok) return;

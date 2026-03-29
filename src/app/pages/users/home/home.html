@@ -12,19 +12,49 @@
 
   <!-- ÖSSZEFOGLALÓ CSEMPEK -->
   <section class="quick-stats">
-    <div class="stat-card" (click)="goUnpaidBills()" style="cursor:pointer;">
+    <div
+      class="stat-card"
+      [class.stat-card-empty]="unpaidBillsCount === 0"
+      (click)="goUnpaidBills()"
+      style="cursor:pointer;"
+    >
       <h3>Számlák</h3>
-      <p>[{{ unpaidBillsCount }}] fizetendő számlád van</p>
+
+      @if (unpaidBillsCount === 0) {
+        <p>Szuper, nincs semmi teendőd 🎉</p>
+      } @else {
+        <p>[{{ unpaidBillsCount }}] fizetendő számlád van</p>
+      }
     </div>
 
-    <div class="stat-card" (click)="goTodayReminders()" style="cursor:pointer;">
+    <div
+      class="stat-card"
+      [class.stat-card-empty]="todayRemindersCount === 0"
+      (click)="goTodayReminders()"
+      style="cursor:pointer;"
+    >
       <h3>Emlékeztetők</h3>
-      <p>[{{ todayRemindersCount }}] emlékeztető ma</p>
+
+      @if (todayRemindersCount === 0) {
+        <p>Szuper, nincs semmi teendőd 🎉</p>
+      } @else {
+        <p>[{{ todayRemindersCount }}] emlékeztető ma</p>
+      }
     </div>
 
-    <div class="stat-card" (click)="goShoppingOpen()" style="cursor:pointer;">
+    <div
+      class="stat-card"
+      [class.stat-card-empty]="shoppingOpenCount === 0"
+      (click)="goShoppingOpen()"
+      style="cursor:pointer;"
+    >
       <h3>Bevásárló lista</h3>
-      <p>[{{ shoppingOpenCount }}] tétel van a listán</p>
+
+      @if (shoppingOpenCount === 0) {
+        <p>Szuper, nincs semmi teendőd 🎉</p>
+      } @else {
+        <p>[{{ shoppingOpenCount }}] tétel van a listán</p>
+      }
     </div>
   </section>
 
