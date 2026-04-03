@@ -31,6 +31,10 @@ export class Reminder {
 
   private isTodayMode = false;
 
+  // HOME-ról jövő speciális eset:
+  // 1 hónapos lista + dátum nélküli emlékeztetők is jelenjenek meg
+  private includeNoDateRemindersFromHome = false;
+
   // globális keresőből jövő paramok
   focusId: number | null = null;
   searchQ = '';
@@ -50,6 +54,7 @@ export class Reminder {
 
       this.searchQ = q;
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
+      this.includeNoDateRemindersFromHome = false;
 
       // ===== GLOBÁLIS KERESŐ =====
       if (q) {
@@ -74,12 +79,21 @@ export class Reminder {
         // felső csempe: ma
         if (!params?.titleMode && !params?.titleText && !params?.periodMonths) {
           this.isTodayMode = true;
+          this.includeNoDateRemindersFromHome = false;
           this.loadTodayReminders();
           return;
         }
 
         // alsó modulcsempe: elmúlt 1 hónap
         this.isTodayMode = false;
+
+        if (
+          titleMode === 'all' &&
+          titleText === '' &&
+          periodMonths === '1'
+        ) {
+          this.includeNoDateRemindersFromHome = true;
+        }
 
         this.filterForm.patchValue({
           titleMode,
@@ -171,14 +185,26 @@ export class Reminder {
     const apiMode = localNeedle ? 'all' : f.titleMode;
     const apiText = localNeedle ? '' : typedText;
 
+    // Home-ról érkező 1 hónapos nézetnél az összeset lekérjük,
+    // és frontendben szűrjük úgy, hogy a dátum nélküli elemek is bent maradjanak
+    const apiPeriodMonths = this.includeNoDateRemindersFromHome
+      ? 'all'
+      : String(f.periodMonths);
+
     this.api.getFiltered({
       titleMode: String(apiMode),
       titleText: String(apiText),
-      periodMonths: String(f.periodMonths)
+      periodMonths: apiPeriodMonths
     }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
-        const all = Array.isArray(list) ? list : [];
+        let all = Array.isArray(list) ? list : [];
+
+        // HOME speciális logika:
+        // elmúlt 1 hónap + dátum nélküli emlékeztetők
+        if (this.includeNoDateRemindersFromHome) {
+          all = all.filter((r: any) => this.isWithinLastMonthOrNoDate(r?.date));
+        }
 
         let filtered = all;
 
@@ -260,7 +286,7 @@ export class Reminder {
     const payload = {
       title: this.reminderForm.value.title,
       description: this.reminderForm.value.description,
-      date: this.reminderForm.value.date
+      date: this.reminderForm.value.date ? this.reminderForm.value.date : null
     };
 
     this.api.create(payload).subscribe({
@@ -285,7 +311,7 @@ export class Reminder {
     const payload = {
       title: this.reminderForm.value.title,
       description: this.reminderForm.value.description,
-      date: this.reminderForm.value.date
+      date: this.reminderForm.value.date ? this.reminderForm.value.date : null
     };
 
     this.api.update(this.selected.id, payload).subscribe({
@@ -345,6 +371,19 @@ export class Reminder {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private isWithinLastMonthOrNoDate(dateValue: any): boolean {
+    if (!dateValue) return true;
+
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return true;
+
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+
+    return d >= oneMonthAgo && d <= today;
   }
 
   private normalizeText(s: string): string {

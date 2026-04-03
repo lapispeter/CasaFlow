@@ -33,6 +33,10 @@ export class MeterReading {
   focusId: number | null = null;
   searchQ = '';
 
+  // HOME-ról jövő speciális eset:
+  // 1 hónapos lista + dátum nélküli elemek is jelenjenek meg
+  includeNoDateReadingsFromHome = false;
+
   constructor(
     private api: MeterReadingService,
     private builder: FormBuilder,
@@ -48,6 +52,7 @@ export class MeterReading {
 
       this.searchQ = q;
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
+      this.includeNoDateReadingsFromHome = false;
 
       // ===== GLOBÁLIS KERESŐ =====
       if (q) {
@@ -66,6 +71,14 @@ export class MeterReading {
         const meterTypeMode = String(params?.meterTypeMode ?? 'all');
         const meterTypeText = String(params?.meterTypeText ?? '');
         const periodMonths = String(params?.periodMonths ?? '1');
+
+        if (
+          meterTypeMode === 'all' &&
+          meterTypeText === '' &&
+          periodMonths === '1'
+        ) {
+          this.includeNoDateReadingsFromHome = true;
+        }
 
         this.filterForm.patchValue({
           meterTypeMode,
@@ -115,14 +128,26 @@ export class MeterReading {
     const apiMode = localNeedle ? 'all' : f.meterTypeMode;
     const apiText = localNeedle ? '' : typedText;
 
+    // Home-ról érkező 1 hónapos nézetnél az összeset lekérjük,
+    // és frontendben szűrjük úgy, hogy a dátum nélküli elemek is bent maradjanak
+    const apiPeriodMonths = this.includeNoDateReadingsFromHome
+      ? 'all'
+      : String(f.periodMonths);
+
     this.api.getFiltered({
       meterTypeMode: String(apiMode),
       meterTypeText: String(apiText),
-      periodMonths: String(f.periodMonths)
+      periodMonths: apiPeriodMonths
     }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
-        const all = Array.isArray(list) ? list : [];
+        let all = Array.isArray(list) ? list : [];
+
+        // HOME speciális logika:
+        // elmúlt 1 hónap + dátum nélküli elemek
+        if (this.includeNoDateReadingsFromHome) {
+          all = all.filter((r: any) => this.isWithinLastMonthOrNoDate(r?.date));
+        }
 
         let filtered = all;
 
@@ -204,7 +229,7 @@ export class MeterReading {
     const payload = {
       meterType: this.mrForm.value.meterType,
       reading: this.mrForm.value.reading,
-      date: this.mrForm.value.date
+      date: this.mrForm.value.date ? this.mrForm.value.date : null
     };
 
     this.api.create(payload).subscribe({
@@ -229,7 +254,7 @@ export class MeterReading {
     const payload = {
       meterType: this.mrForm.value.meterType,
       reading: this.mrForm.value.reading,
-      date: this.mrForm.value.date
+      date: this.mrForm.value.date ? this.mrForm.value.date : null
     };
 
     this.api.update(this.selected.id, payload).subscribe({
@@ -282,6 +307,19 @@ export class MeterReading {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private isWithinLastMonthOrNoDate(dateValue: any): boolean {
+    if (!dateValue) return true;
+
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return true;
+
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+
+    return d >= oneMonthAgo && d <= today;
   }
 
   private normalizeText(s: string): string {

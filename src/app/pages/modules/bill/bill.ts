@@ -34,6 +34,10 @@ export class Bill {
   focusId: number | null = null;
   searchQ = '';
 
+  // HOME-ról jövő speciális eset:
+  // 1 hónapos lista + dátum nélküli számlák is jelenjenek meg
+  includeNoDateBillsFromHome = false;
+
   constructor(
     private api: BillService,
     private builder: FormBuilder,
@@ -51,6 +55,7 @@ export class Bill {
 
       this.searchQ = q;
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
+      this.includeNoDateBillsFromHome = false;
 
       // ===== GLOBÁLIS KERESŐ =====
       if (q) {
@@ -73,6 +78,17 @@ export class Bill {
         const billTypeText = String(params?.billTypeText ?? '');
         const periodMonths = String(params?.periodMonths ?? '1');
         const paymentMode = String(params?.paymentMode ?? 'all');
+
+        // Home > Számlák csempe:
+        // elmúlt 1 hónap + dátum nélküli számlák is
+        if (
+          billTypeMode === 'all' &&
+          billTypeText === '' &&
+          periodMonths === '1' &&
+          paymentMode === 'all'
+        ) {
+          this.includeNoDateBillsFromHome = true;
+        }
 
         this.filterForm.patchValue({
           billTypeMode,
@@ -127,13 +143,20 @@ export class Bill {
 
     const localNeedle = this.searchQ || typedText;
 
-    const apiBillTypeMode = localNeedle ? 'all' : f.billTypeMode;
+    const apiBillTypeMode = localNeedle ? 'all' : String(f.billTypeMode);
     const apiBillTypeText = localNeedle ? '' : typedText;
+
+    // Ha Home-ról jövő 1 hónapos lista van,
+    // akkor backendből mindent kérünk, és frontendben szűrjük:
+    // elmúlt 1 hónap VAGY nincs dátum
+    const apiPeriodMonths = this.includeNoDateBillsFromHome
+      ? 'all'
+      : String(f.periodMonths);
 
     this.api.getBillsFiltered({
       billTypeMode: String(apiBillTypeMode),
       billTypeText: String(apiBillTypeText),
-      periodMonths: String(f.periodMonths),
+      periodMonths: apiPeriodMonths,
       paymentMode: String(f.paymentMode)
     }).subscribe({
 
@@ -144,13 +167,19 @@ export class Bill {
 
         let filtered = all;
 
+        // Home speciális szűrés:
+        // elmúlt 1 hónap + dátum nélküli számlák
+        if (this.includeNoDateBillsFromHome) {
+          filtered = filtered.filter((b: any) => this.isWithinLastMonthOrNoDate(b?.date));
+        }
+
         if (localNeedle) {
 
           const parts = this.normalizeText(localNeedle)
             .split(/\s+/)
             .filter(Boolean);
 
-          filtered = all.filter((b: any) => {
+          filtered = filtered.filter((b: any) => {
 
             const hay = this.normalizeText(
               `${b?.billType ?? ''} ${b?.amount ?? ''} ${b?.paymentStatus ?? ''}`
@@ -256,7 +285,7 @@ export class Bill {
     const newBill = {
       billType: this.billForm.value.billType,
       amount: this.billForm.value.amount,
-      date: this.billForm.value.date,
+      date: this.billForm.value.date ? this.billForm.value.date : null,
       paymentStatus: this.billForm.value.paymentStatus
     };
 
@@ -297,7 +326,7 @@ export class Bill {
     const updatedBill = {
       billType: this.billForm.value.billType,
       amount: this.billForm.value.amount,
-      date: this.billForm.value.date,
+      date: this.billForm.value.date ? this.billForm.value.date : null,
       paymentStatus: this.billForm.value.paymentStatus
     };
 
@@ -326,6 +355,45 @@ export class Bill {
 
     });
 
+  }
+
+  markAsPaid(bill: any) {
+    if (!bill?.id) return;
+    if (this.isSaving) return;
+
+    this.isSaving = true;
+
+    const updatedBill = {
+      billType: bill.billType,
+      amount: bill.amount,
+      date: this.toDateInputValue(bill.date) || null,
+      paymentStatus: 'Igen'
+    };
+
+    this.api.updateBill(bill.id, updatedBill).subscribe({
+
+      next: () => {
+
+        this.showSuccess('A számla befizetettként lett jelölve ✅');
+
+        if (this.showList)
+          this.applyFilters();
+
+        this.isSaving = false;
+
+      },
+
+      error: (err) => {
+
+        console.log(err);
+
+        this.showError('Hiba történt a frissítésnél.');
+
+        this.isSaving = false;
+
+      }
+
+    });
   }
 
   startDelete(bill: any) {
@@ -399,6 +467,19 @@ export class Bill {
 
     return `${yyyy}-${mm}-${dd}`;
 
+  }
+
+  private isWithinLastMonthOrNoDate(dateValue: any): boolean {
+    if (!dateValue) return true;
+
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return true;
+
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+
+    return d >= oneMonthAgo && d <= today;
   }
 
   private normalizeText(s: string): string {

@@ -79,6 +79,51 @@
   background: rgba(220, 53, 69, 0.15);
 }
 
+/* Teljesített sor */
+.cf-row-done{
+  background: rgba(60, 201, 167, 0.08);
+}
+
+/* Cukibb gyors gomb */
+.cf-done-btn{
+  background: #7bc9b2;
+  border: 1px solid #7bc9b2;
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+}
+
+.cf-done-btn:hover{
+  background: #69b79f;
+  border-color: #69b79f;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(91, 154, 139, 0.22);
+}
+
+.cf-done-btn:disabled{
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Kész badge */
+.cf-done-badge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e6f7f1;
+  color: #2d6f63;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 /* ====== FOOTER LINK ====== */
 .cf-footer{
   margin-top: 28px;
@@ -153,6 +198,10 @@
     box-shadow: 0 4px 14px rgba(0,0,0,0.05);
   }
 
+  .cf-mobile-cards tr.cf-row-done{
+    background: rgba(60, 201, 167, 0.08);
+  }
+
   .cf-mobile-cards td{
     border: 0 !important;
     border-bottom: 1px solid rgba(0,0,0,0.06) !important;
@@ -188,6 +237,10 @@
   }
 
   .cf-mobile-cards .cf-actions-cell .btn{
+    margin-right: 0 !important;
+  }
+
+  .cf-mobile-cards .cf-actions-cell .cf-done-badge{
     margin-right: 0 !important;
   }
 }

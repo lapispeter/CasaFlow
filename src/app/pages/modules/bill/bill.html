@@ -26,10 +26,10 @@
     </div>
   }
 
-<p class="cf-info">
-  Az alábbi listában az elmúlt 1 hónap adatait látod.
-  Bővebb szűrést a <strong>Számláim</strong> gombra kattintva állíthatsz be.
-</p>
+  <p class="cf-info">
+    Az alábbi listában az elmúlt 1 hónap adatait látod.
+    Bővebb szűrést a <strong>Számláim</strong> gombra kattintva állíthatsz be.
+  </p>
 
   @if(showList){
     <div class="cf-card">
@@ -47,10 +47,12 @@
 
           <tbody>
             @for(bill of bills; track bill.id) {
-              <tr>
+              <tr [class.cf-row-done]="bill.paymentStatus === 'Igen'">
                 <td data-label="Számlatípus">{{ bill.billType }}</td>
                 <td data-label="Fizetendő összeg">{{ bill.amount }}</td>
-                <td data-label="Határidő">{{ bill.date | date:'yyyy. MM. dd.' }}</td>
+                <td data-label="Határidő">
+                  {{ bill.date ? (bill.date | date:'yyyy. MM. dd.') : '-' }}
+                </td>
                 <td data-label="Fizetve">
                   <span
                     class="cf-status"
@@ -61,6 +63,18 @@
                   </span>
                 </td>
                 <td data-label="Műveletek" class="text-end cf-actions-cell">
+                  @if(bill.paymentStatus !== 'Igen'){
+                    <button
+                      class="btn btn-sm cf-done-btn me-2"
+                      (click)="markAsPaid(bill)"
+                      [disabled]="isSaving"
+                    >
+                      ✓ 
+                    </button>
+                  } @else {
+                    <span class="cf-done-badge me-2">✓ Kész</span>
+                  }
+
                   <button class="btn btn-sm btn-warning me-2" (click)="startEdit(bill)">Módosítás</button>
                   <button class="btn btn-sm btn-danger" (click)="startDelete(bill)">Törlés</button>
                 </td>

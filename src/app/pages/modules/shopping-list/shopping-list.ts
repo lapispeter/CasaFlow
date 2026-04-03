@@ -36,6 +36,10 @@ export class ShoppingList {
   // globális keresőből érkező q
   searchQ = '';
 
+  // HOME-ról jövő speciális eset:
+  // 1 hónapos lista + dátum nélküli elemek is jelenjenek meg
+  includeNoDateItemsFromHome = false;
+
   constructor(
     private api: ShoppingListService,
     private builder: FormBuilder,
@@ -51,6 +55,7 @@ export class ShoppingList {
 
       this.focusId = focusIdRaw != null ? Number(focusIdRaw) : null;
       this.searchQ = q;
+      this.includeNoDateItemsFromHome = false;
 
       // ===== GLOBÁLIS KERESŐ =====
       if (q) {
@@ -75,6 +80,17 @@ export class ShoppingList {
         const expiryMode = String(params?.expiryMode ?? 'all');
 
         this.searchQ = '';
+
+        // Bevásárló lista csempe: elmúlt 1 hónap + dátum nélküli elemek is
+        if (
+          titleMode === 'all' &&
+          titleText === '' &&
+          periodMonths === '1' &&
+          boughtMode === 'all' &&
+          expiryMode === 'all'
+        ) {
+          this.includeNoDateItemsFromHome = true;
+        }
 
         this.filterForm.patchValue({
           titleMode,
@@ -122,16 +138,30 @@ export class ShoppingList {
   applyFilters() {
     const f = this.filterForm.value;
 
+    // Ha Home-ról jöttünk az 1 hónapos bevásárló lista csempéről,
+    // akkor backendből az összeset kérjük le, és frontendben szűrjük:
+    // - elmúlt 1 hónap
+    // - vagy nincs dátuma
+    const apiPeriodMonths = this.includeNoDateItemsFromHome
+      ? 'all'
+      : String(f.periodMonths);
+
     this.api.getFiltered({
       titleMode: String(f.titleMode),
       titleText: String(f.titleText ?? ''),
-      periodMonths: String(f.periodMonths),
+      periodMonths: apiPeriodMonths,
       boughtMode: String(f.boughtMode),
       expiryMode: String(f.expiryMode)
     }).subscribe({
       next: (res: any) => {
         const list = res.data ?? res;
-        const allItems = Array.isArray(list) ? list : [];
+        let allItems = Array.isArray(list) ? list : [];
+
+        // HOME speciális szűrés:
+        // elmúlt 1 hónap + dátum nélküli tételek
+        if (this.includeNoDateItemsFromHome) {
+          allItems = allItems.filter((x: any) => this.isWithinLastMonthOrNoDate(x?.purchaseDate));
+        }
 
         // frontend keresés globális q esetén
         if (this.searchQ) {
@@ -345,6 +375,19 @@ export class ShoppingList {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private isWithinLastMonthOrNoDate(dateValue: any): boolean {
+    if (!dateValue) return true;
+
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return true;
+
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+
+    return d >= oneMonthAgo && d <= today;
   }
 
   private normalizeText(s: string): string {
